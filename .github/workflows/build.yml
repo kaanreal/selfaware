@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [fabric, forge, neoforge, quilt]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: python3 scripts/build.py --loader '${{ matrix.loader }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selfaware-${{ matrix.loader }}
+          path: |
+            build/*-${{ matrix.loader }}/libs/*.jar
+            build/*-${{ matrix.loader }}/reports/tests/
+            build/verification/
+          if-no-files-found: error
