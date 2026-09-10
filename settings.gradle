@@ -1,0 +1,29 @@
+import groovy.json.JsonSlurper
+
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.architectury.dev/' }
+        maven { url = 'https://maven.neoforged.net/releases/' }
+        maven { url = 'https://maven.quiltmc.org/repository/release/' }
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'selfaware'
+def requested = providers.gradleProperty('target').getOrElse('1.21.1-fabric')
+def targets = new JsonSlurper().parse(file('versions.json'))
+def selected = targets.find { it.id == requested }
+if (selected == null) {
+    throw new GradleException("Unknown target '${requested}'. See versions.json for available builds.")
+}
+gradle.ext.target = selected
+rootProject.buildFileName = 'gradle/' + (selected.minecraft.startsWith('26.') ? selected.loader : 'legacy') + '.gradle'
+// Loom reads this before the project build script runs.
+gradle.beforeProject { project ->
+    project.ext.set('loom.platform', selected.loader)
+}

@@ -1,0 +1,482 @@
+[
+  {
+    "id": "1.16.5-fabric",
+    "minecraft": "1.16.5",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 8,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.18.2-forge",
+    "minecraft": "1.18.2",
+    "loader": "forge",
+    "loaderVersion": "40.2.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.18.2-fabric",
+    "minecraft": "1.18.2",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.2-forge",
+    "minecraft": "1.19.2",
+    "loader": "forge",
+    "loaderVersion": "43.3.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.2-fabric",
+    "minecraft": "1.19.2",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.4-forge",
+    "minecraft": "1.19.4",
+    "loader": "forge",
+    "loaderVersion": "45.2.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.4-fabric",
+    "minecraft": "1.19.4",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.1-forge",
+    "minecraft": "1.20.1",
+    "loader": "forge",
+    "loaderVersion": "47.2.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.1-fabric",
+    "minecraft": "1.20.1",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.2-forge",
+    "minecraft": "1.20.2",
+    "loader": "forge",
+    "loaderVersion": "48.1.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.2-neoforge",
+    "minecraft": "1.20.2",
+    "loader": "neoforge",
+    "loaderVersion": "20.2.86",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.2-fabric",
+    "minecraft": "1.20.2",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.4-forge",
+    "minecraft": "1.20.4",
+    "loader": "forge",
+    "loaderVersion": "49.1.0",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.4-neoforge",
+    "minecraft": "1.20.4",
+    "loader": "neoforge",
+    "loaderVersion": "20.4.251",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.4-fabric",
+    "minecraft": "1.20.4",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.6-forge",
+    "minecraft": "1.20.6",
+    "loader": "forge",
+    "loaderVersion": "50.1.20",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.6-neoforge",
+    "minecraft": "1.20.6",
+    "loader": "neoforge",
+    "loaderVersion": "20.6.139",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.6-fabric",
+    "minecraft": "1.20.6",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.1-forge",
+    "minecraft": "1.21.1",
+    "loader": "forge",
+    "loaderVersion": "52.1.0",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.1-neoforge",
+    "minecraft": "1.21.1",
+    "loader": "neoforge",
+    "loaderVersion": "21.1.209",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.1-fabric",
+    "minecraft": "1.21.1",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.3-forge",
+    "minecraft": "1.21.3",
+    "loader": "forge",
+    "loaderVersion": "53.0.5",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.3-neoforge",
+    "minecraft": "1.21.3",
+    "loader": "neoforge",
+    "loaderVersion": "21.3.4-beta",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.3-fabric",
+    "minecraft": "1.21.3",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.4-forge",
+    "minecraft": "1.21.4",
+    "loader": "forge",
+    "loaderVersion": "54.0.0",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.4-neoforge",
+    "minecraft": "1.21.4",
+    "loader": "neoforge",
+    "loaderVersion": "21.4.7-beta",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.4-fabric",
+    "minecraft": "1.21.4",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.5-forge",
+    "minecraft": "1.21.5",
+    "loader": "forge",
+    "loaderVersion": "55.0.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.5-neoforge",
+    "minecraft": "1.21.5",
+    "loader": "neoforge",
+    "loaderVersion": "21.5.2-beta",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.5-fabric",
+    "minecraft": "1.21.5",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.8-forge",
+    "minecraft": "1.21.8",
+    "loader": "forge",
+    "loaderVersion": "58.1.0",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.8-neoforge",
+    "minecraft": "1.21.8",
+    "loader": "neoforge",
+    "loaderVersion": "21.8.47",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.8-fabric",
+    "minecraft": "1.21.8",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.10-forge",
+    "minecraft": "1.21.10",
+    "loader": "forge",
+    "loaderVersion": "60.0.0",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.10-neoforge",
+    "minecraft": "1.21.10",
+    "loader": "neoforge",
+    "loaderVersion": "21.10.0-beta",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.10-fabric",
+    "minecraft": "1.21.10",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.11-neoforge",
+    "minecraft": "1.21.11",
+    "loader": "neoforge",
+    "loaderVersion": "21.11.0-beta",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.11-fabric",
+    "minecraft": "1.21.11",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.16.5-forge",
+    "minecraft": "1.16.5",
+    "loader": "forge",
+    "loaderVersion": "36.2.34",
+    "java": 8,
+    "adapter": "legacy"
+  },
+  {
+    "id": "26.1-fabric",
+    "minecraft": "26.1",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 25,
+    "adapter": "modern"
+  },
+  {
+    "id": "26.1.2-neoforge",
+    "minecraft": "26.1.2",
+    "loader": "neoforge",
+    "loaderVersion": "26.1.2.74",
+    "java": 25,
+    "adapter": "modern"
+  },
+  {
+    "id": "26.2-fabric",
+    "minecraft": "26.2",
+    "loader": "fabric",
+    "loaderVersion": "0.19.3",
+    "java": 25,
+    "adapter": "modern"
+  },
+  {
+    "id": "26.2-neoforge",
+    "minecraft": "26.2",
+    "loader": "neoforge",
+    "loaderVersion": "26.2.0.25-beta",
+    "java": 25,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.16.5-quilt",
+    "minecraft": "1.16.5",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 8,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.18.2-quilt",
+    "minecraft": "1.18.2",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.2-quilt",
+    "minecraft": "1.19.2",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.19.4-quilt",
+    "minecraft": "1.19.4",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.1-quilt",
+    "minecraft": "1.20.1",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.2-quilt",
+    "minecraft": "1.20.2",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.4-quilt",
+    "minecraft": "1.20.4",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 17,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.20.6-quilt",
+    "minecraft": "1.20.6",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.1-quilt",
+    "minecraft": "1.21.1",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "legacy"
+  },
+  {
+    "id": "1.21.3-quilt",
+    "minecraft": "1.21.3",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.4-quilt",
+    "minecraft": "1.21.4",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.5-quilt",
+    "minecraft": "1.21.5",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.8-quilt",
+    "minecraft": "1.21.8",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.10-quilt",
+    "minecraft": "1.21.10",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "1.21.11-quilt",
+    "minecraft": "1.21.11",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 21,
+    "adapter": "modern"
+  },
+  {
+    "id": "26.1-quilt",
+    "minecraft": "26.1",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 25,
+    "adapter": "modern"
+  },
+  {
+    "id": "26.2-quilt",
+    "minecraft": "26.2",
+    "loader": "quilt",
+    "loaderVersion": "0.30.1",
+    "java": 25,
+    "adapter": "modern"
+  }
+]

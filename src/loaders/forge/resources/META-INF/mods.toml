@@ -1,0 +1,22 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="All Rights Reserved"
+[[mods]]
+modId="selfaware"
+version="${version}"
+displayName="Selfaware"
+authors="Kaan"
+description="See your own nametag in third person."
+displayTest="IGNORE_ALL_VERSION"
+[[dependencies.selfaware]]
+modId="forge"
+mandatory=true
+versionRange="[${loaderVersion},)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.selfaware]]
+modId="minecraft"
+mandatory=true
+versionRange="[${minecraft}]"
+ordering="NONE"
+side="BOTH"

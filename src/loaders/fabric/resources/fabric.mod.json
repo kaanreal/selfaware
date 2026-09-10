@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "selfaware",
+  "version": "${version}",
+  "name": "Selfaware",
+  "description": "See your own nametag in third person.",
+  "authors": ["Kaan"],
+  "environment": "client",
+  "mixins": ["selfaware.mixins.json"],
+  "depends": {
+    "fabricloader": ">=${loaderVersion}",
+    "minecraft": "=${minecraft}",
+    "java": ">=${java}"
+  }
+}

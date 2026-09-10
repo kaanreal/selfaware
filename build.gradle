@@ -1,0 +1,148 @@
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'org.ow2.asm:asm-tree:9.9' }
+}
+
+def target = gradle.ext.target
+def modern = target.minecraft.startsWith('26.')
+def neoGradle = modern && target.loader == 'neoforge'
+
+version = providers.gradleProperty('mod_version').get()
+group = 'dev.kaan'
+base.archivesName = "selfaware-${target.id}"
+def clientRun = gradle.startParameter.taskNames.any { it.split(':').last() == 'runClient' }
+layout.buildDirectory = clientRun ? file('build') : file("build/${target.id}")
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.neoforged.net/releases/' }
+    maven { url = 'https://maven.quiltmc.org/repository/release/' }
+}
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    sourceCompatibility = JavaVersion.toVersion(target.java)
+    targetCompatibility = JavaVersion.toVersion(target.java)
+    withSourcesJar()
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = target.java
+}
+tasks.withType(JavaExec).configureEach {
+    if (name == 'runClient') {
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(target.java)
+        }
+    }
+}
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+sourceSets.main.java.srcDirs = ['src/main/java', "src/adapters/${target.adapter}/java"]
+sourceSets.main.java.srcDir target.minecraft == '26.2' ? 'src/adapters/hud/java' : 'src/adapters/options/java'
+if (target.loader in ['forge', 'neoforge']) {
+    sourceSets.main.java.srcDir "src/loaders/${target.loader}/java"
+}
+sourceSets.main.resources.srcDirs = ['src/main/resources', "src/loaders/${target.loader}/resources"]
+
+def needsRefmap = !modern && (target.loader in ['fabric', 'quilt'] || (target.loader == 'forge' && target.java < 21))
+if (!neoGradle) {
+    loom {
+        mods {
+            selfaware {
+                sourceSet sourceSets.main
+            }
+        }
+        if (!modern) {
+            silentMojangMappingsLicense()
+            if (needsRefmap) {
+                mixin {
+                    useLegacyMixinAp = true
+                    defaultRefmapName = 'selfaware.refmap.json'
+                }
+            }
+        }
+        if (target.loader == 'forge') {
+            forge { mixinConfig 'selfaware.mixins.json' }
+        }
+        runs {
+            client {
+                runDir "run/${target.id}"
+                if (providers.gradleProperty('smoke').isPresent()) {
+                    vmArg '-Dmixin.debug.export=true'
+                }
+            }
+        }
+    }
+} else {
+    runs {
+        client {
+            client()
+            modSource sourceSets.main
+            workingDirectory file("run/${target.id}")
+            if (providers.gradleProperty('smoke').isPresent()) {
+                systemProperty 'mixin.debug.export', 'true'
+            }
+        }
+    }
+}
+
+dependencies {
+    if (neoGradle) {
+        implementation "net.neoforged:neoforge:${target.loaderVersion}"
+    } else {
+        minecraft "com.mojang:minecraft:${target.minecraft}"
+        if (!modern) mappings loom.officialMojangMappings()
+        if (target.loader in ['fabric', 'quilt']) {
+            def coordinate = target.loader == 'fabric' ? 'net.fabricmc:fabric-loader' : 'org.quiltmc:quilt-loader'
+            if (modern) implementation "${coordinate}:${target.loaderVersion}"
+            else modImplementation "${coordinate}:${target.loaderVersion}"
+        } else if (target.loader == 'forge') {
+            forge "net.minecraftforge:forge:${target.minecraft}-${target.loaderVersion}"
+        } else {
+            neoForge "net.neoforged:neoforge:${target.loaderVersion}"
+        }
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.4'
+}
+
+test { useJUnitPlatform() }
+processResources {
+    def values = [version: project.version, minecraft: target.minecraft, java: target.java,
+                  loaderVersion: target.loaderVersion, refmap: needsRefmap ? '"refmap": "selfaware.refmap.json",' : '']
+    inputs.properties(values)
+    filesMatching(['fabric.mod.json', 'quilt.mod.json', 'META-INF/*.toml', 'selfaware.mixins.json']) { expand(values) }
+    if (target.loader == 'neoforge' && target.minecraft in ['1.20.2', '1.20.4']) {
+        rename 'neoforge.mods.toml', 'mods.toml'
+    }
+}
+jar {
+    if (target.loader == 'forge') manifest.attributes('MixinConfigs': 'selfaware.mixins.json')
+}
+
+// Check the actual mapped game method even on loaders without a Mixin annotation processor.
+tasks.register('verifyMixinTarget') {
+    dependsOn compileJava
+    doLast {
+        def path = 'net/minecraft/client/renderer/entity/LivingEntityRenderer.class'
+        def descriptor = target.adapter == 'legacy' ? '(Lnet/minecraft/world/entity/LivingEntity;)Z' : '(Lnet/minecraft/world/entity/LivingEntity;D)Z'
+        def found = false
+        configurations.compileClasspath.files.findAll { it.name.endsWith('.jar') }.each { file ->
+            new java.util.zip.ZipFile(file).withCloseable { zip ->
+                def entry = zip.getEntry(path)
+                if (entry != null) {
+                    def node = new org.objectweb.asm.tree.ClassNode()
+                    zip.getInputStream(entry).withCloseable { stream ->
+                        new org.objectweb.asm.ClassReader(stream).accept(node, org.objectweb.asm.ClassReader.SKIP_CODE)
+                    }
+                    found = node.methods.any { it.name == 'shouldShowName' && it.desc == descriptor }
+                }
+            }
+        }
+        if (!found) throw new GradleException("Renderer injection target missing for ${target.id}")
+    }
+}
+check.dependsOn verifyMixinTarget

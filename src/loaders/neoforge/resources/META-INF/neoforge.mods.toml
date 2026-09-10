@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="All Rights Reserved"
+[[mods]]
+modId="selfaware"
+version="${version}"
+displayName="Selfaware"
+authors="Kaan"
+description="See your own nametag in third person."
+[[mixins]]
+config="selfaware.mixins.json"
+[[dependencies.selfaware]]
+modId="neoforge"
+type="required"
+mandatory=true
+versionRange="[${loaderVersion},)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.selfaware]]
+modId="minecraft"
+type="required"
+mandatory=true
+versionRange="[${minecraft}]"
+ordering="NONE"
+side="BOTH"
