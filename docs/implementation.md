@@ -4,7 +4,7 @@ Selfaware shows the local player's vanilla nametag in both third-person views. I
 
 The name must disappear in first person, with F1, when invisible or spectating, and when the scoreboard team hides names from its own members. Other entities keep vanilla behavior. Sneaking keeps vanilla distance and text rendering. Name formatting, team prefixes, and scoreboard text remain Minecraft's responsibility.
 
-Mod Menu opens a small Selfaware config screen with one nametag toggle and one global Simple Voice Chat icon toggle. The integration is optional, so Selfaware does not depend on Mod Menu at runtime. `SelfawareConfig` stores both values in `config/selfaware.properties`, so the choice survives restarts and is shared by every version-specific jar. The SVC toggle is checked before the optional integration renders anything, and the nametag toggle is checked before the local name is selected.
+Mod Menu opens a small Selfaware config screen with nametag, Simple Voice Chat icon, and server formatting toggles. The integration is optional, so Selfaware does not depend on Mod Menu at runtime. `SelfawareConfig` stores the settings in `config/selfaware.properties`, so the choice survives restarts and is shared by every version-specific jar. The SVC toggle is checked before the optional integration renders anything, and the nametag toggle is checked before the local name is selected.
 
 Each row in versions.json picks the Minecraft version, loader, Java level, and renderer adapter. Every target compiles the same feature code. Loader entrypoints only register the mod. An adapter changes when Minecraft changes a method signature.
 
@@ -25,3 +25,20 @@ Every declared target must build, and its jar must contain valid metadata and mi
 - [Architectury Loom](https://docs.architectury.dev/loom/introduction/) supplies remapping and Forge/NeoForge development support for obfuscated releases. Minecraft 26.x uses Fabric Loom or NeoGradle directly.
 
 Source-set adapters are enough for this first feature. Stonecutter becomes useful if the version-specific code grows past a few small adapters. Dependencies are pinned, and a new version needs its own matrix entry and build check.
+
+## Server formatting
+
+The opt-in setting `server_formatting_enabled` changes only the local player's name selected by the entity renderer. Off preserves the existing vanilla path. On uses that player's tab-list component when present and nonblank, otherwise their vanilla team-formatted name. It copies the component so the appearance hook can identify this exact draw without affecting another player, chat, or the tab list. It does not combine tab and team prefixes, which could duplicate a rank.
+
+On 1.19.4+, the detector reads text displays within 32 blocks once per client tick. A candidate must contain a connected player's exact profile name with username boundaries, and either ride that player or sit within one horizontal block and -0.5 to 3 blocks of their head. Invisible players and spectators are excluded. The closest candidate supplies its shadow flag and custom background color. The last observed appearance is remembered for the current server and stored in the shared config, so a missing candidate does not make the local tag revert to vanilla. A new server loads only its own cached appearance. Before 1.19.4, text displays do not exist and only the name fallback applies.
+
+Minecraft still renders the name, score line, distance, depth behavior, and sneaking alpha. The appearance hook changes only shadow and background for the local name component, leaving the second vanilla pass without a background. On 1.21.1, the score adapter also fills a missing local below-name score from a compact money value in the local sidebar objective. Text-display scaling, billboards, opacity, custom fonts from another player's component, and extra lines are not reconstructed. A plugin that offsets text using a transformation rather than mounting or positioning it near the head may not be detected. Nicknames that omit the profile name are deliberately not guessed.
+
+### Research notes (2026-09-12)
+
+- [TAB's nametag guide](https://github.com/NEZNAMY/TAB/wiki/Feature-guide:-Nametags) describes scoreboard teams: prefixes, suffixes, name color, and visibility. These already reach the vanilla player renderer. Teams cannot encode arbitrary text-display shadows or backgrounds.
+- [TAB's tab-list guide](https://github.com/NEZNAMY/TAB/wiki/Feature-guide:-Tablist-name-formatting) treats tab names separately. Using the local tab entry is a useful fallback, but it is not proof that the server gives that same overhead name to other viewers.
+- [Paper's display documentation](https://docs.papermc.io/paper/dev/display-entities/) documents separate text-display entities and background/shadow controls. [DisplayTags](https://github.com/imskeptical/DisplayTags/blob/main/src/main/java/me/itsskeptical/displaytags/nametags/Nametag.java) creates a client text display, applies configurable text shadow/background, and mounts it on the player for viewers.
+- [TAB's below-name guide](https://github.com/NEZNAMY/TAB/wiki/Feature-guide:-Belowname) describes a separate scoreboard objective. A money line might instead be a plugin's display text. A screenshot alone cannot distinguish those paths or establish DonutSMP's current plugin setup.
+
+There is no generic packet containing a server's nametag template. A client cannot recover an unsent balance, rank, or viewer-specific line by inspecting a neighbor's tag. Nearby appearance matching is an approximation explicitly chosen for this feature; the sampled text is never substituted into the local name.

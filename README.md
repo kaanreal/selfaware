@@ -8,7 +8,9 @@ Install it on your client. Servers and other players don't need it. No Fabric AP
 
 When Simple Voice Chat is connected and idle, no icon is expected. The icon appears when you are talking, whispering, disconnected, or have voice chat disabled, matching Simple Voice Chat's normal player-name behavior.
 
-If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, open Selfaware's config screen from the Mods list to change the local nametag and Simple Voice Chat icon settings. Both toggles are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
+If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, open Selfaware's config screen from the Mods list to change the local nametag and Simple Voice Chat icon settings. All settings are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
+
+Turn on **Server formatting** to use your server-provided tab name, with your normal team-formatted name as the fallback. On 1.19.4 and newer, Selfaware learns the shadow and background of a nearby text-display nametag and remembers it for that server, so the style stays active after the other player leaves view. On 1.21.1, if the server hides your own below-name money score, Selfaware can reuse a compact money value from your sidebar so the vanilla score line is rendered too. The option defaults to off. Servers can send different formatting to different viewers, so this is a local approximation, not an exact preview of what everyone else sees.
 
 ## Versions
 

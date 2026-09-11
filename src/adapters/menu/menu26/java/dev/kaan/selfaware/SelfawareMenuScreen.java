@@ -8,6 +8,7 @@ public final class SelfawareMenuScreen extends Screen {
     private final Screen parent;
     private Button nametagButton;
     private Button svcIconsButton;
+    private Button serverFormattingButton;
 
     public SelfawareMenuScreen(Screen parent) {
         super(SelfawareMenu.title());
@@ -17,7 +18,7 @@ public final class SelfawareMenuScreen extends Screen {
     @Override
     protected void init() {
         int x = width / 2 - 125;
-        int y = height / 2 - 44;
+        int y = height / 2 - 57;
         nametagButton = addRenderableWidget(Button.builder(SelfawareMenu.nametagLabel(), button -> {
             SelfawareMenu.toggleNametag();
             nametagButton.setMessage(SelfawareMenu.nametagLabel());
@@ -26,8 +27,12 @@ public final class SelfawareMenuScreen extends Screen {
             SelfawareMenu.toggleSvcIcons();
             svcIconsButton.setMessage(SelfawareMenu.svcIconsLabel());
         }).bounds(x, y + 26, 250, 20).build());
+        serverFormattingButton = addRenderableWidget(Button.builder(SelfawareMenu.serverFormattingLabel(), button -> {
+            SelfawareMenu.toggleServerFormatting();
+            serverFormattingButton.setMessage(SelfawareMenu.serverFormattingLabel());
+        }).bounds(x, y + 52, 250, 20).build());
         addRenderableWidget(Button.builder(SelfawareMenu.doneLabel(), button -> onClose())
-                .bounds(x, y + 60, 250, 20)
+                .bounds(x, y + 86, 250, 20)
                 .build());
     }
 
@@ -39,6 +44,6 @@ public final class SelfawareMenuScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
-        graphics.centeredText(font, SelfawareMenu.title(), width / 2, height / 2 - 78, 0xFFFFFF);
+        graphics.centeredText(font, SelfawareMenu.title(), width / 2, height / 2 - 91, 0xFFFFFF);
     }
 }

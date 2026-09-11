@@ -29,6 +29,14 @@ public final class SelfawareMenu {
         SelfawareConfig.setSvcIconsEnabled(!SelfawareConfig.svcIconsEnabled());
     }
 
+    public static Component serverFormattingLabel() {
+        return Component.nullToEmpty("Server formatting: " + onOff(SelfawareConfig.serverFormattingEnabled()));
+    }
+
+    public static void toggleServerFormatting() {
+        SelfawareConfig.setServerFormattingEnabled(!SelfawareConfig.serverFormattingEnabled());
+    }
+
     private static String onOff(boolean enabled) {
         return enabled ? "ON" : "OFF";
     }

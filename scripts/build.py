@@ -20,7 +20,12 @@ def verify_jar(target):
         names = archive.namelist()
         mixin = json.loads(archive.read('selfaware.mixins.json'))
         assert mixin['required'] and mixin['injectors']['defaultRequire'] == 1
-        assert mixin['client'] == ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin'] and not mixin.get('mixins')
+        expected_mixins = ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin', 'EntityRendererMixin']
+        if target['minecraft'] not in ['1.16.5', '1.18.2', '1.19.2']:
+            expected_mixins += ['TextDisplayAccessor', 'NameTagFormattingMixin']
+        if target['minecraft'] == '1.21.1':
+            expected_mixins += ['PlayerRendererMixin']
+        assert mixin['client'] == expected_mixins and not mixin.get('mixins')
         assert 'dev/kaan/selfaware/mixin/PauseScreenMixin.class' not in names
         for name in ['NameTagVisibility', 'SelfNameTag']:
             assert f'dev/kaan/selfaware/{name}.class' in names

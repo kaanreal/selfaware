@@ -42,7 +42,19 @@ tasks.withType(AbstractArchiveTask).configureEach {
     reproducibleFileOrder = true
 }
 
+def textDisplays = !(target.minecraft in ['1.16.5', '1.18.2', '1.19.2'])
+def formatAdapter = target.minecraft == '1.21.8' ? 'drawvoid'
+        : target.minecraft == '26.2' ? 'submit26'
+        : target.minecraft.startsWith('26.') ? 'submit261'
+        : target.minecraft in ['1.21.10', '1.21.11'] ? 'submit'
+        : 'draw'
+def formattingMixins = textDisplays ? ', "TextDisplayAccessor", "NameTagFormattingMixin"' : ''
+if (target.minecraft == '1.21.1') formattingMixins += ', "PlayerRendererMixin"'
 sourceSets.main.java.srcDirs = ['src/main/java', "src/adapters/${target.adapter}/java"]
+sourceSets.main.java.srcDir "src/adapters/formatting/${textDisplays ? 'display' : 'no-display'}/java"
+if (textDisplays) sourceSets.main.java.srcDir "src/adapters/formatting/${formatAdapter}/java"
+if (target.minecraft == '1.21.1') sourceSets.main.java.srcDir 'src/adapters/formatting/scoreboard21/java'
+if (target.minecraft == '1.21.1') sourceSets.test.java.srcDir 'src/adapters/formatting/scoreboard21/test'
 def menuAdapter = target.minecraft == '1.16.5' ? 'menu16'
         : target.minecraft in ['1.18.2', '1.19.2'] ? 'menu18'
         : target.minecraft == '1.19.4' ? 'menu19'
@@ -172,6 +184,7 @@ dependencies {
 test { useJUnitPlatform() }
 processResources {
     def values = [version: project.version, minecraft: target.minecraft, java: target.java,
+                  formattingMixins: formattingMixins,
                   loaderVersion: target.loaderVersion, refmap: needsRefmap ? '"refmap": "selfaware.refmap.json",' : '']
     inputs.properties(values)
     filesMatching(['fabric.mod.json', 'quilt.mod.json', 'META-INF/*.toml', 'selfaware.mixins.json']) { expand(values) }
@@ -206,3 +219,55 @@ tasks.register('verifyMixinTarget') {
     }
 }
 check.dependsOn verifyMixinTarget
+
+tasks.register('verifyFormattingTargets') {
+    dependsOn compileJava
+    doLast {
+        def entity = 'net/minecraft/client/renderer/entity/EntityRenderer'
+        def feature = 'net/minecraft/client/renderer/feature/NameTagFeatureRenderer'
+        def display = 'net/minecraft/world/entity/Display$TextDisplay'
+        def classes = [:].withDefault { [] }
+        configurations.compileClasspath.files.findAll { it.name.endsWith('.jar') }.each { file ->
+            new java.util.zip.ZipFile(file).withCloseable { zip ->
+                [entity, feature, display].each { path ->
+                    def entry = zip.getEntry(path + '.class')
+                    if (entry != null) {
+                        def node = new org.objectweb.asm.tree.ClassNode()
+                        zip.getInputStream(entry).withCloseable { stream ->
+                            new org.objectweb.asm.ClassReader(stream).accept(node, 0)
+                        }
+                        classes[path] << node
+                    }
+                }
+            }
+        }
+        def nameMethod = target.adapter == 'legacy' ? 'render' : 'getNameTag'
+        assert classes[entity].any { node ->
+            node.methods.any { method ->
+                method.name == nameMethod && method.instructions.any { instruction ->
+                    instruction instanceof org.objectweb.asm.tree.MethodInsnNode &&
+                            instruction.owner == 'net/minecraft/world/entity/Entity' && instruction.name == 'getDisplayName'
+                }
+            }
+        }: "Name formatting target missing for ${target.id}"
+        if (textDisplays) {
+            ['getText', 'getFlags', 'getBackgroundColor'].each { name ->
+                assert classes[display].any { node -> node.methods.any { it.name == name && it.desc.startsWith('()') } }
+            }
+            def renderer = formatAdapter.startsWith('draw') ? entity : feature
+            def methodName = formatAdapter.startsWith('draw') ? 'renderNameTag'
+                    : formatAdapter == 'submit26' ? 'prepareText'
+                    : formatAdapter == 'submit261' ? 'renderTranslucent' : 'render'
+            def fontMethod = formatAdapter == 'submit26' ? 'prepareText' : 'drawInBatch'
+            assert classes[renderer].any { node ->
+                node.methods.any { method ->
+                    method.name == methodName && method.instructions.any { instruction ->
+                        instruction instanceof org.objectweb.asm.tree.MethodInsnNode &&
+                                instruction.owner == 'net/minecraft/client/gui/Font' && instruction.name == fontMethod
+                    }
+                }
+            }: "Name appearance target missing for ${target.id}"
+        }
+    }
+}
+check.dependsOn verifyFormattingTargets

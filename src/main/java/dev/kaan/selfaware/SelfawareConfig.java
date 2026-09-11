@@ -11,6 +11,11 @@ public final class SelfawareConfig {
     private static final Path FILE = Paths.get("config", "selfaware.properties");
     private static boolean nametagEnabled = true;
     private static boolean svcIconsEnabled = true;
+    private static boolean serverFormattingEnabled = false;
+    private static String cachedFormattingServer;
+    private static boolean cachedFormattingShadow;
+    private static boolean cachedFormattingDefaultBackground;
+    private static int cachedFormattingBackground;
 
     static {
         load();
@@ -36,6 +41,40 @@ public final class SelfawareConfig {
         save();
     }
 
+    public static synchronized boolean serverFormattingEnabled() {
+        return serverFormattingEnabled;
+    }
+
+    public static synchronized void setServerFormattingEnabled(boolean enabled) {
+        serverFormattingEnabled = enabled;
+        save();
+    }
+
+    static synchronized String cachedFormattingServer() {
+        return cachedFormattingServer;
+    }
+
+    static synchronized boolean cachedFormattingShadow() {
+        return cachedFormattingShadow;
+    }
+
+    static synchronized boolean cachedFormattingDefaultBackground() {
+        return cachedFormattingDefaultBackground;
+    }
+
+    static synchronized int cachedFormattingBackground() {
+        return cachedFormattingBackground;
+    }
+
+    static synchronized void saveCachedFormatting(String server, boolean shadow,
+            boolean defaultBackground, int background) {
+        cachedFormattingServer = server;
+        cachedFormattingShadow = shadow;
+        cachedFormattingDefaultBackground = defaultBackground;
+        cachedFormattingBackground = background;
+        save();
+    }
+
     static boolean parseBoolean(String value, boolean fallback) {
         if (value == null) {
             return fallback;
@@ -54,16 +93,39 @@ public final class SelfawareConfig {
         try (InputStream input = Files.newInputStream(FILE)) {
             properties.load(input);
             nametagEnabled = parseBoolean(properties.getProperty("nametag_enabled"), true);
+            serverFormattingEnabled = parseBoolean(properties.getProperty("server_formatting_enabled"), false);
             svcIconsEnabled = parseBoolean(properties.getProperty("svc_icons_enabled"), true);
+            cachedFormattingServer = properties.getProperty("server_formatting_cached_server");
+            if (cachedFormattingServer != null && cachedFormattingServer.trim().isEmpty()) {
+                cachedFormattingServer = null;
+            }
+            cachedFormattingShadow = parseBoolean(properties.getProperty("server_formatting_cached_shadow"), false);
+            cachedFormattingDefaultBackground = parseBoolean(
+                    properties.getProperty("server_formatting_cached_default_background"), false);
+            try {
+                cachedFormattingBackground = Integer.parseInt(
+                        properties.getProperty("server_formatting_cached_background", "0"));
+            } catch (NumberFormatException ignored) {
+                cachedFormattingBackground = 0;
+            }
         } catch (Exception ignored) {
-            // Missing or unreadable settings keep the feature defaults enabled.
+            // Missing or unreadable settings keep the defaults.
         }
     }
 
     private static void save() {
         Properties properties = new Properties();
         properties.setProperty("nametag_enabled", Boolean.toString(nametagEnabled));
+        properties.setProperty("server_formatting_enabled", Boolean.toString(serverFormattingEnabled));
         properties.setProperty("svc_icons_enabled", Boolean.toString(svcIconsEnabled));
+        if (cachedFormattingServer != null) {
+            properties.setProperty("server_formatting_cached_server", cachedFormattingServer);
+            properties.setProperty("server_formatting_cached_shadow", Boolean.toString(cachedFormattingShadow));
+            properties.setProperty("server_formatting_cached_default_background",
+                    Boolean.toString(cachedFormattingDefaultBackground));
+            properties.setProperty("server_formatting_cached_background",
+                    Integer.toString(cachedFormattingBackground));
+        }
         try {
             Files.createDirectories(FILE.getParent());
             try (OutputStream output = Files.newOutputStream(FILE)) {
