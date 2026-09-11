@@ -10,6 +10,10 @@
       "description": "See your own nametag in third person.",
       "contributors": {"Kaan": "Owner"}
     },
+    "entrypoints": {
+      "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
+      "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
+    },
     "depends": [
       {"id": "quilt_loader", "versions": ">=${loaderVersion}"},
       {"id": "minecraft", "versions": "=${minecraft}"},

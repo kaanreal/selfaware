@@ -7,6 +7,8 @@ import subprocess
 import sys
 import zipfile
 
+from gradle_env import for_gradle
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -18,10 +20,19 @@ def verify_jar(target):
         names = archive.namelist()
         mixin = json.loads(archive.read('selfaware.mixins.json'))
         assert mixin['required'] and mixin['injectors']['defaultRequire'] == 1
-        assert mixin['client'] == ['LivingEntityRendererMixin'] and not mixin.get('mixins')
+        assert mixin['client'] == ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin'] and not mixin.get('mixins')
+        assert 'dev/kaan/selfaware/mixin/PauseScreenMixin.class' not in names
         for name in ['NameTagVisibility', 'SelfNameTag']:
             assert f'dev/kaan/selfaware/{name}.class' in names
         assert 'dev/kaan/selfaware/mixin/LivingEntityRendererMixin.class' in names
+        assert 'dev/kaan/selfaware/SimpleVoiceChatIcon.class' in names
+        assert 'dev/kaan/selfaware/SimpleVoiceChatPlugin.class' in names
+        assert not any(name.startswith('de/maxhenkel/voicechat/') for name in names)
+        if target['loader'] in ['fabric', 'quilt']:
+            assert 'dev/kaan/selfaware/SelfawareModMenu.class' in names
+        else:
+            assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
+        assert not any(name.startswith('com/terraformersmc/modmenu/') for name in names)
         assert not any(name.endswith('Test.class') for name in names)
         if 'refmap' in mixin:
             assert json.loads(archive.read(mixin['refmap']))['mappings']
@@ -30,12 +41,16 @@ def verify_jar(target):
             assert metadata['minecraft']['environment'] == 'client'
             assert metadata['quilt_loader']['version'] == version
             assert {'id': 'minecraft', 'versions': '=' + target['minecraft']} in metadata['quilt_loader']['depends']
+            assert metadata['quilt_loader']['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
+            assert metadata['quilt_loader']['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert 'fabric.mod.json' not in names
         elif target['loader'] == 'fabric':
             metadata = json.loads(archive.read('fabric.mod.json'))
             assert metadata['environment'] == 'client'
             assert metadata['depends']['minecraft'] == '=' + target['minecraft']
             assert metadata['version'] == version and metadata['id'] == 'selfaware'
+            assert metadata['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
+            assert metadata['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert not any(name.endswith('.toml') for name in names)
         else:
             filename = 'META-INF/mods.toml' if target['loader'] == 'forge' or target['minecraft'] in ['1.20.2', '1.20.4'] else 'META-INF/neoforge.mods.toml'
@@ -78,13 +93,13 @@ def main():
         log = log_dir / (identifier + '.log')
         try:
             if not args.verify_only:
-                command = [str(ROOT / 'gradlew'), 'build', f'-Ptarget={identifier}', '--console=plain']
+                command = [str(ROOT / 'gradlew'), 'clean', 'build', f'-Ptarget={identifier}', '--console=plain']
                 if target['loader'] == 'neoforge' and target['minecraft'].startswith('26.'):
                     # NeoGradle adds an empty game-test task that downloads runtime assets and can hang in CI.
                     command += ['-x', 'testJunit']
                 with log.open('w') as output:
                     subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT,
-                                   check=True, timeout=1200)
+                                   check=True, timeout=1200, env=for_gradle())
             artifact = verify_jar(target)
             results.append({'target': identifier, 'build': 'passed', 'artifact': artifact})
             print(f'Passed {identifier}', flush=True)

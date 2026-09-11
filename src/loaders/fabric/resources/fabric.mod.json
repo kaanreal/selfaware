@@ -6,6 +6,10 @@
   "description": "See your own nametag in third person.",
   "authors": ["Kaan"],
   "environment": "client",
+  "entrypoints": {
+    "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
+    "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
+  },
   "mixins": ["selfaware.mixins.json"],
   "depends": {
     "fabricloader": ">=${loaderVersion}",

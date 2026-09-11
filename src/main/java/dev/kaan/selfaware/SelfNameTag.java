@@ -12,6 +12,9 @@ public final class SelfNameTag {
     }
 
     public static boolean shouldShow(LivingEntity entity, double distanceSquared) {
+        if (!SelfawareConfig.nametagEnabled()) {
+            return false;
+        }
         Minecraft client = Minecraft.getInstance();
         Team team = entity.getTeam();
         boolean hiddenByTeam = team != null && (team.getNameTagVisibility() == Team.Visibility.NEVER

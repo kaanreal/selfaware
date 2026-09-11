@@ -4,6 +4,6 @@
   "package": "dev.kaan.selfaware.mixin",
   "compatibilityLevel": "JAVA_${java}",
   ${refmap}
-  "client": ["LivingEntityRendererMixin"],
+  "client": ["LivingEntityRendererMixin", "SimpleVoiceChatRenderEventsMixin"],
   "injectors": {"defaultRequire": 1}
 }
