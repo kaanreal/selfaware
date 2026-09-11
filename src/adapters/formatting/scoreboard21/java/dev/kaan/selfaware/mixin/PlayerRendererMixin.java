@@ -1,6 +1,7 @@
 package dev.kaan.selfaware.mixin;
 
 import dev.kaan.selfaware.SelfawareConfig;
+import dev.kaan.selfaware.ServerFormatting;
 import dev.kaan.selfaware.ServerFormattingScore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -21,12 +22,15 @@ abstract class PlayerRendererMixin {
     private ReadOnlyScoreInfo selfaware$ownBelowNameScore(Scoreboard scoreboard, ScoreHolder holder,
             Objective objective) {
         ReadOnlyScoreInfo original = scoreboard.getPlayerScoreInfo(holder, objective);
-        if (!SelfawareConfig.serverFormattingEnabled()
+        if (!SelfawareConfig.donutMoneyEnabled()
                 || !(holder instanceof Player player)
-                || player != Minecraft.getInstance().player
-                || original != null) {
+                || player != Minecraft.getInstance().player) {
             return original;
         }
-        return ServerFormattingScore.fallback(scoreboard, objective);
+        if (!ServerFormatting.isDonutServer()) {
+            return original;
+        }
+        ReadOnlyScoreInfo tabScore = ServerFormattingScore.fromTab(Minecraft.getInstance());
+        return tabScore == null ? original : tabScore;
     }
 }

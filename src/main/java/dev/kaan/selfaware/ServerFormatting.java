@@ -36,6 +36,26 @@ public final class ServerFormatting {
         return ownName;
     }
 
+    public static boolean isDonutServer() {
+        return isDonutServer(Minecraft.getInstance());
+    }
+
+    private static boolean isDonutServer(Minecraft client) {
+        return isDonutAddress(serverKey(client));
+    }
+
+    static boolean isDonutAddress(String address) {
+        if (address == null || address.equals(SINGLEPLAYER_SERVER)) {
+            return false;
+        }
+        String host = address.trim().toLowerCase(Locale.ROOT);
+        int port = host.lastIndexOf(':');
+        if (port > 0 && host.indexOf(':') == port) {
+            host = host.substring(0, port);
+        }
+        return host.equals("donutsmp.net") || host.endsWith(".donutsmp.net");
+    }
+
     static Component selectName(Component vanilla, Component tab) {
         return (tab == null || tab.getString().trim().isEmpty() ? vanilla : tab).copy();
     }

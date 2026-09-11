@@ -37,6 +37,18 @@ public final class SelfawareMenu {
         SelfawareConfig.setServerFormattingEnabled(!SelfawareConfig.serverFormattingEnabled());
     }
 
+    public static Component donutMoneyLabel() {
+        return Component.nullToEmpty("Donut money: " + onOff(SelfawareConfig.donutMoneyEnabled()));
+    }
+
+    public static boolean donutMoneyAvailable() {
+        return DonutMoneySupport.available() && ServerFormatting.isDonutServer();
+    }
+
+    public static void toggleDonutMoney() {
+        SelfawareConfig.setDonutMoneyEnabled(!SelfawareConfig.donutMoneyEnabled());
+    }
+
     private static String onOff(boolean enabled) {
         return enabled ? "ON" : "OFF";
     }

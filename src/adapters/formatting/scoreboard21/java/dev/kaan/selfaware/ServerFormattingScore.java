@@ -1,12 +1,10 @@
 package dev.kaan.selfaware;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.NumberFormat;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
-import net.minecraft.world.scores.Scoreboard;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -18,25 +16,17 @@ public final class ServerFormattingScore {
 
     private ServerFormattingScore() {}
 
-    public static ReadOnlyScoreInfo fallback(Scoreboard scoreboard, Objective belowName) {
-        Objective sidebar = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
-        if (sidebar == null || sidebar == belowName) {
+    public static ReadOnlyScoreInfo fromTab(Minecraft client) {
+        if (client.player == null || client.getConnection() == null) {
             return null;
         }
-        for (PlayerScoreEntry entry : scoreboard.listPlayerScores(sidebar)) {
-            Component display = entry.display();
-            String text = display == null ? entry.owner() : display.getString();
-            if (text.indexOf('$') >= 0 || text.toLowerCase().contains("money")
-                    || text.toLowerCase().contains("balance")) {
-                Integer value = parseMoneyValue(text);
-                if (value == null) {
-                    continue;
-                }
-                NumberFormat format = entry.numberFormatOverride();
-                return new FallbackScore(value, format);
-            }
+        PlayerInfo info = client.getConnection().getPlayerInfo(client.player.getUUID());
+        Component tab = info == null ? null : info.getTabListDisplayName();
+        if (tab == null || tab.getString().trim().isEmpty()) {
+            return null;
         }
-        return null;
+        Integer value = parseMoneyValue(tab.getString());
+        return value == null ? null : new FallbackScore(value, null);
     }
 
     static Integer parseMoneyValue(String text) {

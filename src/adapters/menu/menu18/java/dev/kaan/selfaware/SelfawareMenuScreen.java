@@ -10,6 +10,7 @@ public final class SelfawareMenuScreen extends Screen {
     private Button nametagButton;
     private Button svcIconsButton;
     private Button serverFormattingButton;
+    private Button donutMoneyButton;
 
     public SelfawareMenuScreen(Screen parent) {
         super(SelfawareMenu.title());
@@ -32,7 +33,15 @@ public final class SelfawareMenuScreen extends Screen {
             SelfawareMenu.toggleServerFormatting();
             serverFormattingButton.setMessage(SelfawareMenu.serverFormattingLabel());
         }));
-        addRenderableWidget(new Button(x, y + 86, 250, 20, SelfawareMenu.doneLabel(), button -> onClose()));
+        int doneOffset = 86;
+        if (SelfawareMenu.donutMoneyAvailable()) {
+            donutMoneyButton = addRenderableWidget(new Button(x, y + 78, 250, 20, SelfawareMenu.donutMoneyLabel(), button -> {
+                SelfawareMenu.toggleDonutMoney();
+                donutMoneyButton.setMessage(SelfawareMenu.donutMoneyLabel());
+            }));
+            doneOffset = 112;
+        }
+        addRenderableWidget(new Button(x, y + doneOffset, 250, 20, SelfawareMenu.doneLabel(), button -> onClose()));
     }
 
     @Override

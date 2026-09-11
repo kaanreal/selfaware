@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ServerFormattingTest {
     @Test
@@ -21,5 +23,13 @@ class ServerFormattingTest {
         Component vanilla = Component.nullToEmpty("kaanreal");
         assertEquals(vanilla, ServerFormatting.selectName(vanilla, null));
         assertEquals(vanilla, ServerFormatting.selectName(vanilla, Component.nullToEmpty("  ")));
+    }
+
+    @Test
+    void limitsDonutMoneyToTheDonutServerAddress() {
+        assertTrue(ServerFormatting.isDonutAddress("donutsmp.net:25565"));
+        assertTrue(ServerFormatting.isDonutAddress("play.donutsmp.net"));
+        assertFalse(ServerFormatting.isDonutAddress("example.donutsmp.com"));
+        assertFalse(ServerFormatting.isDonutAddress("singleplayer"));
     }
 }

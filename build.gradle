@@ -55,6 +55,7 @@ sourceSets.main.java.srcDir "src/adapters/formatting/${textDisplays ? 'display' 
 if (textDisplays) sourceSets.main.java.srcDir "src/adapters/formatting/${formatAdapter}/java"
 if (target.minecraft == '1.21.1') sourceSets.main.java.srcDir 'src/adapters/formatting/scoreboard21/java'
 if (target.minecraft == '1.21.1') sourceSets.test.java.srcDir 'src/adapters/formatting/scoreboard21/test'
+sourceSets.main.java.srcDir "src/adapters/donut-money/${target.minecraft == '1.21.1' ? 'enabled' : 'disabled'}/java"
 def menuAdapter = target.minecraft == '1.16.5' ? 'menu16'
         : target.minecraft in ['1.18.2', '1.19.2'] ? 'menu18'
         : target.minecraft == '1.19.4' ? 'menu19'
