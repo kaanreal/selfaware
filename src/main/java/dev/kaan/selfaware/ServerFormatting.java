@@ -14,6 +14,9 @@ public final class ServerFormatting {
     private static final String SINGLEPLAYER_SERVER = "singleplayer";
     private static Component ownName;
     private static Appearance appearance;
+    private static Component sampledText;
+    private static Entity sampledDisplay;
+    private static boolean ownDisplay;
     private static Object world;
     private static String server;
     private static int checkedTick = -1;
@@ -24,7 +27,16 @@ public final class ServerFormatting {
     public static Component name(Entity entity) {
         Component vanilla = entity.getDisplayName();
         Minecraft client = Minecraft.getInstance();
-        if (entity != client.player || !SelfawareConfig.serverFormattingEnabled()) {
+        if (entity != client.player) {
+            return vanilla;
+        }
+        boolean serverFormatting = SelfawareConfig.serverFormattingEnabled();
+        boolean donutMoney = SelfawareConfig.donutMoneyEnabled() && isDonutServer(client);
+        if (!serverFormatting && !donutMoney) {
+            return vanilla;
+        }
+        appearance = findAppearance(client);
+        if (!serverFormatting) {
             return vanilla;
         }
         PlayerInfo info = client.getConnection() == null ? null
@@ -32,7 +44,6 @@ public final class ServerFormatting {
         // A tab-list component belongs to this player, but can differ from the overhead name.
         Component tab = info == null ? null : info.getTabListDisplayName();
         ownName = selectName(vanilla, tab);
-        appearance = findAppearance(client);
         return ownName;
     }
 
@@ -66,6 +77,9 @@ public final class ServerFormatting {
             server = null;
             checkedTick = -1;
             cached = null;
+            sampledText = null;
+            sampledDisplay = null;
+            ownDisplay = false;
             return null;
         }
 
@@ -75,20 +89,25 @@ public final class ServerFormatting {
             server = currentServer;
             checkedTick = -1;
             cached = loadCachedAppearance(currentServer);
+            sampledText = null;
+            sampledDisplay = null;
+            ownDisplay = false;
         }
         if (checkedTick == client.player.tickCount) {
             return cached;
         }
         checkedTick = client.player.tickCount;
         if (!ServerTextDisplays.available()) {
+            ownDisplay = false;
             return cached;
         }
 
+        ownDisplay = false;
         double closest = 32 * 32;
         Appearance observed = null;
         for (Entity entity : client.level.entitiesForRendering()) {
             double distance = entity.distanceToSqr(client.player);
-            if (distance >= closest || entity.isInvisible()) {
+            if (distance >= 32 * 32 || entity.isInvisible()) {
                 continue;
             }
             DisplayStyle display = ServerTextDisplays.read(entity);
@@ -97,7 +116,7 @@ public final class ServerFormatting {
             }
             for (Player player : client.level.players()) {
                 if (player.isInvisible() || player.isSpectator()
-                        || !ServerNameMatch.containsName(display.text, player.getName().getString())) {
+                        || !ServerNameMatch.containsName(display.text.getString(), player.getName().getString())) {
                     continue;
                 }
                 // Plugins either mount their display or teleport it above the player's head.
@@ -107,7 +126,15 @@ public final class ServerFormatting {
                                 entity.getZ() - player.getZ())) {
                     continue;
                 }
+                if (player == client.player) {
+                    ownDisplay = true;
+                }
+                if (distance >= closest) {
+                    continue;
+                }
                 observed = display.appearance;
+                sampledText = display.text.copy();
+                sampledDisplay = entity;
                 closest = distance;
                 break;
             }
@@ -142,13 +169,30 @@ public final class ServerFormatting {
     }
 
     public static final class DisplayStyle {
-        public final String text;
+        public final Component text;
         public final Appearance appearance;
 
-        public DisplayStyle(String text, Appearance appearance) {
+        public DisplayStyle(Component text, Appearance appearance) {
             this.text = text;
             this.appearance = appearance;
         }
+    }
+
+    public static Component sampledText() {
+        return sampledText;
+    }
+
+    public static Entity sampledDisplay() {
+        return sampledDisplay;
+    }
+
+    public static boolean hasOwnTextDisplay() {
+        findAppearance(Minecraft.getInstance());
+        return ownDisplay;
+    }
+
+    public static Appearance observedAppearance() {
+        return appearance;
     }
 
     public static Appearance appearance(Component text) {

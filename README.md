@@ -2,15 +2,17 @@
 
 See your own nametag in third person. That's it for now.
 
-Press F5 to see it from either side. Minecraft still handles the text, team prefix, and name color. The tag hides with F1, in first person, while invisible or spectating, and when your team hides names from its own members.
+Press F5 to see it from either side. Minecraft still handles the text, team prefix, and name color. The tag hides with F1, in first person, while invisible or spectating, and keeps vanilla's local-player behavior for team visibility.
 
 Install it on your client. Servers and other players don't need it. No Fabric API or Architectury API dependency. If Simple Voice Chat is installed too, Selfaware uses its own nameplate renderer so your name gets the same speaker, whisper, disconnected, and disabled icons as other players. That integration is optional and stays off when Simple Voice Chat is missing.
 
 When Simple Voice Chat is connected and idle, no icon is expected. The icon appears when you are talking, whispering, disconnected, or have voice chat disabled, matching Simple Voice Chat's normal player-name behavior.
 
-If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, open Selfaware's config screen from the Mods list to change the local nametag and Simple Voice Chat icon settings. All settings are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
+If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, open Selfaware from the Mods list. The settings screen uses simple vanilla buttons, and changes apply immediately and are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
 
-Turn on **Server formatting** to use your server-provided tab name, with your normal team-formatted name as the fallback. On 1.19.4 and newer, Selfaware learns the shadow and background of a nearby text-display nametag and remembers it for that server, so the style stays active after the other player leaves view. The separate **Donut money** option appears while connected to DonutSMP on 1.21.1. It reads your money from your tab entry and lets Minecraft render the same below-name score line used for other players. Both options default to off. Servers can send different formatting to different viewers, so this is a local approximation, not an exact preview of what everyone else sees.
+Turn on **Server formatting** to use your server-provided tab name, with your normal team-formatted name as the fallback. On 1.19.4 and newer, Selfaware learns the shadow and background of a nearby text-display nametag and remembers it for that server, so the style stays active after the other player leaves view. The separate **Donut money** option appears while connected to DonutSMP on 1.21.1. It reads your money from the tab footer and renders the name and balance as one Minecraft text display with one shared background. Both options default to off. Servers can send different formatting to different viewers, so this is a local approximation, not an exact preview of what everyone else sees.
+
+When a server sends a separate text-display nameplate for your player, Selfaware leaves its local vanilla nameplate hidden so the server plate is not duplicated.
 
 ## Versions
 

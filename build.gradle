@@ -49,7 +49,7 @@ def formatAdapter = target.minecraft == '1.21.8' ? 'drawvoid'
         : target.minecraft in ['1.21.10', '1.21.11'] ? 'submit'
         : 'draw'
 def formattingMixins = textDisplays ? ', "TextDisplayAccessor", "NameTagFormattingMixin"' : ''
-if (target.minecraft == '1.21.1') formattingMixins += ', "PlayerRendererMixin"'
+if (target.minecraft == '1.21.1') formattingMixins += ', "TabOverlayAccessor", "TextDisplay21Accessor", "Display21Accessor", "PlayerRendererMixin"'
 sourceSets.main.java.srcDirs = ['src/main/java', "src/adapters/${target.adapter}/java"]
 sourceSets.main.java.srcDir "src/adapters/formatting/${textDisplays ? 'display' : 'no-display'}/java"
 if (textDisplays) sourceSets.main.java.srcDir "src/adapters/formatting/${formatAdapter}/java"

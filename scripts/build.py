@@ -24,7 +24,8 @@ def verify_jar(target):
         if target['minecraft'] not in ['1.16.5', '1.18.2', '1.19.2']:
             expected_mixins += ['TextDisplayAccessor', 'NameTagFormattingMixin']
         if target['minecraft'] == '1.21.1':
-            expected_mixins += ['PlayerRendererMixin']
+            expected_mixins += ['TabOverlayAccessor', 'TextDisplay21Accessor', 'Display21Accessor',
+                                'PlayerRendererMixin']
         assert mixin['client'] == expected_mixins and not mixin.get('mixins')
         assert 'dev/kaan/selfaware/mixin/PauseScreenMixin.class' not in names
         for name in ['NameTagVisibility', 'SelfNameTag']:

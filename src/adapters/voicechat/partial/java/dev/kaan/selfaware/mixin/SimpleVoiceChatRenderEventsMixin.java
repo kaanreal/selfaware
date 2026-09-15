@@ -1,6 +1,7 @@
 package dev.kaan.selfaware.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.kaan.selfaware.DonutMoneySupport;
 import dev.kaan.selfaware.SelfNameTag;
 import dev.kaan.selfaware.SimpleVoiceChatIcon;
 import dev.kaan.selfaware.SimpleVoiceChatPlugin;
@@ -31,6 +32,13 @@ abstract class SimpleVoiceChatRenderEventsMixin {
         }
         ResourceLocation texture = selfaware$texture(SimpleVoiceChatPlugin.localIcon(player));
         if (texture != null) {
+            if (DonutMoneySupport.needsNameOffset((net.minecraft.client.player.AbstractClientPlayer) player)) {
+                poseStack.pushPose();
+                poseStack.translate(0.0F, 0.25875F, 0.0F);
+                selfaware$renderPlayerIcon(player, component, texture, poseStack, buffer, light, partialTicks);
+                poseStack.popPose();
+                return;
+            }
             selfaware$renderPlayerIcon(player, component, texture, poseStack, buffer, light, partialTicks);
         }
     }

@@ -17,7 +17,7 @@ public final class ServerTextDisplays {
         }
         TextDisplayAccessor display = (TextDisplayAccessor) entity;
         byte flags = display.selfaware$getFlags();
-        return new ServerFormatting.DisplayStyle(display.selfaware$getText().getString(),
+        return new ServerFormatting.DisplayStyle(display.selfaware$getText().copy(),
                 new ServerFormatting.Appearance((flags & Display.TextDisplay.FLAG_SHADOW) != 0,
                         (flags & Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND) != 0,
                         display.selfaware$getBackgroundColor()));

@@ -2,7 +2,6 @@ package dev.kaan.selfaware;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.scores.Team;
 
 public final class SelfNameTag {
     private SelfNameTag() {}
@@ -16,9 +15,15 @@ public final class SelfNameTag {
             return false;
         }
         Minecraft client = Minecraft.getInstance();
-        Team team = entity.getTeam();
-        boolean hiddenByTeam = team != null && (team.getNameTagVisibility() == Team.Visibility.NEVER
-                || team.getNameTagVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM);
+        // Some servers send a separate text-display nameplate for the local player.
+        // Leave that native plate alone instead of drawing a second vanilla label.
+        if (ServerFormatting.hasOwnTextDisplay()) {
+            return false;
+        }
+        // EntityRenderer skips team visibility checks for the camera entity. Keep that
+        // vanilla behavior so servers that hide names from teammates do not hide our
+        // own third-person tag as well.
+        boolean hiddenByTeam = false;
         return NameTagVisibility.visible(!client.options.getCameraType().isFirstPerson(),
                 HudVisibility.isHidden(client), entity.isInvisible(), entity.isSpectator(),
                 hiddenByTeam, entity.isDiscrete(), distanceSquared);
