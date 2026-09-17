@@ -7,12 +7,14 @@
   "authors": ["Kaan"],
   "environment": "client",
   "entrypoints": {
-    "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"]
+    "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
+    "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
   },
   "mixins": ["selfaware.mixins.json"],
   "depends": {
     "fabricloader": ">=${loaderVersion}",
     "minecraft": "=${minecraft}",
-    "java": ">=${java}"
+    "java": ">=${java}",
+    "modmenu": ">=${modMenuVersion}"
   }
 }

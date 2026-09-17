@@ -32,4 +32,11 @@ class ServerFormattingTest {
         assertFalse(ServerFormatting.isDonutAddress("example.donutsmp.com"));
         assertFalse(ServerFormatting.isDonutAddress("singleplayer"));
     }
+
+    @Test
+    void onlyActivatesDonutRankOnDonutServer() {
+        assertTrue(ServerFormatting.donutRankActive(true, true));
+        assertFalse(ServerFormatting.donutRankActive(true, false));
+        assertFalse(ServerFormatting.donutRankActive(false, true));
+    }
 }

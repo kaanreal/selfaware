@@ -31,12 +31,13 @@ public final class ServerFormatting {
             return vanilla;
         }
         boolean serverFormatting = SelfawareConfig.serverFormattingEnabled();
+        boolean donutRank = donutRankActive(SelfawareConfig.donutRankEnabled(), isDonutServer(client));
         boolean donutMoney = SelfawareConfig.donutMoneyEnabled() && isDonutServer(client);
-        if (!serverFormatting && !donutMoney) {
+        if (!serverFormatting && !donutRank && !donutMoney) {
             return vanilla;
         }
         appearance = findAppearance(client);
-        if (!serverFormatting) {
+        if (!serverFormatting && !donutRank) {
             return vanilla;
         }
         PlayerInfo info = client.getConnection() == null ? null
@@ -65,6 +66,10 @@ public final class ServerFormatting {
             host = host.substring(0, port);
         }
         return host.equals("donutsmp.net") || host.endsWith(".donutsmp.net");
+    }
+
+    static boolean donutRankActive(boolean enabled, boolean donutServer) {
+        return enabled && donutServer;
     }
 
     static Component selectName(Component vanilla, Component tab) {
@@ -196,7 +201,8 @@ public final class ServerFormatting {
     }
 
     public static Appearance appearance(Component text) {
-        return SelfawareConfig.serverFormattingEnabled() && text == ownName ? appearance : null;
+        boolean donutRank = donutRankActive(SelfawareConfig.donutRankEnabled(), isDonutServer());
+        return (SelfawareConfig.serverFormattingEnabled() || donutRank) && text == ownName ? appearance : null;
     }
 
     public static final class Appearance {

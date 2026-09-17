@@ -1,6 +1,7 @@
 package dev.kaan.selfaware;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,31 +18,48 @@ public final class SelfawareMenuScreen extends Screen {
         this.parent = parent;
     }
 
+    public static void open() {
+        Minecraft client = Minecraft.getInstance();
+        if (!(client.screen instanceof SelfawareMenuScreen)) {
+            client.setScreen(new SelfawareMenuScreen(client.screen));
+        }
+    }
+
     @Override
     protected void init() {
         int x = width / 2 - 125;
-        int y = height / 2 - 57;
-        nametagButton = addButton(new Button(x, y, 250, 20, SelfawareMenu.nametagLabel(), button -> {
+        int y = SelfawareMenu.top(height);
+        int row = 0;
+        nametagButton = addButton(new Button(x, y + row++ * 26, 250, 20, SelfawareMenu.nametagLabel(), button -> {
             SelfawareMenu.toggleNametag();
             nametagButton.setMessage(SelfawareMenu.nametagLabel());
         }));
-        svcIconsButton = addButton(new Button(x, y + 26, 250, 20, SelfawareMenu.svcIconsLabel(), button -> {
-            SelfawareMenu.toggleSvcIcons();
-            svcIconsButton.setMessage(SelfawareMenu.svcIconsLabel());
-        }));
-        serverFormattingButton = addButton(new Button(x, y + 52, 250, 20, SelfawareMenu.serverFormattingLabel(), button -> {
+        if (SelfawareMenu.svcIconsAvailable()) {
+            svcIconsButton = addButton(new Button(x, y + row++ * 26, 250, 20,
+                    SelfawareMenu.svcIconsLabel(), button -> {
+                        SelfawareMenu.toggleSvcIcons();
+                        svcIconsButton.setMessage(SelfawareMenu.svcIconsLabel());
+                    }));
+        }
+        serverFormattingButton = addButton(new Button(x, y + row++ * 26, 250, 20,
+                SelfawareMenu.serverFormattingLabel(), button -> {
             SelfawareMenu.toggleServerFormatting();
             serverFormattingButton.setMessage(SelfawareMenu.serverFormattingLabel());
         }));
-        int doneOffset = 86;
+        if (SelfawareMenu.donutRankAvailable()) {
+            addButton(new Button(x, y + row++ * 26, 250, 20, SelfawareMenu.donutRankLabel(), button -> {
+                SelfawareMenu.toggleDonutRank();
+                button.setMessage(SelfawareMenu.donutRankLabel());
+            }));
+        }
         if (SelfawareMenu.donutMoneyAvailable()) {
-            donutMoneyButton = addButton(new Button(x, y + 78, 250, 20, SelfawareMenu.donutMoneyLabel(), button -> {
+            donutMoneyButton = addButton(new Button(x, y + row++ * 26, 250, 20,
+                    SelfawareMenu.donutMoneyLabel(), button -> {
                 SelfawareMenu.toggleDonutMoney();
                 donutMoneyButton.setMessage(SelfawareMenu.donutMoneyLabel());
             }));
-            doneOffset = 112;
         }
-        addButton(new Button(x, y + doneOffset, 250, 20, SelfawareMenu.doneLabel(), button -> onClose()));
+        addButton(new Button(x, y + row * 26 + 8, 250, 20, SelfawareMenu.doneLabel(), button -> onClose()));
     }
 
     @Override
@@ -52,7 +70,8 @@ public final class SelfawareMenuScreen extends Screen {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(poseStack);
-        GuiComponent.drawCenteredString(poseStack, font, SelfawareMenu.title(), width / 2, height / 2 - 91, 0xFFFFFF);
+        GuiComponent.drawCenteredString(poseStack, font, SelfawareMenu.title(), width / 2,
+                SelfawareMenu.top(height) - 24, 0xFFFFFF);
         super.render(poseStack, mouseX, mouseY, partialTicks);
     }
 }

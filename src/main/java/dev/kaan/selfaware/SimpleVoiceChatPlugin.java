@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 @ForgeVoicechatPlugin
 public final class SimpleVoiceChatPlugin implements VoicechatPlugin {
     private static volatile VoicechatClientApi clientApi;
+    private static volatile Boolean available;
 
     public SimpleVoiceChatPlugin() {}
 
@@ -56,6 +57,22 @@ public final class SimpleVoiceChatPlugin implements VoicechatPlugin {
         } catch (Throwable ignored) {
             return null;
         }
+    }
+
+    public static boolean available() {
+        Boolean known = available;
+        if (known != null) {
+            return known;
+        }
+        boolean present = getClientApi() != null;
+        try {
+            Class.forName("de.maxhenkel.voicechat.voice.client.ClientManager", false,
+                    SimpleVoiceChatPlugin.class.getClassLoader());
+            present = true;
+        } catch (Throwable ignored) {
+        }
+        available = present;
+        return present;
     }
 
     private static VoicechatClientApi getClientApi() {

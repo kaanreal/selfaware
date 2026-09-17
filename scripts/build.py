@@ -20,7 +20,8 @@ def verify_jar(target):
         names = archive.namelist()
         mixin = json.loads(archive.read('selfaware.mixins.json'))
         assert mixin['required'] and mixin['injectors']['defaultRequire'] == 1
-        expected_mixins = ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin', 'EntityRendererMixin']
+        expected_mixins = ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin', 'EntityRendererMixin',
+                           'SelfawareMinecraftMixin', 'SelfawareOptionsMixin', 'SelfawareChatScreenMixin']
         if target['minecraft'] not in ['1.16.5', '1.18.2', '1.19.2']:
             expected_mixins += ['TextDisplayAccessor', 'NameTagFormattingMixin']
         if target['minecraft'] == '1.21.1':
@@ -30,11 +31,17 @@ def verify_jar(target):
         assert 'dev/kaan/selfaware/mixin/PauseScreenMixin.class' not in names
         for name in ['NameTagVisibility', 'SelfNameTag']:
             assert f'dev/kaan/selfaware/{name}.class' in names
+        assert 'dev/kaan/selfaware/SelfawareCommand.class' in names
         assert 'dev/kaan/selfaware/mixin/LivingEntityRendererMixin.class' in names
         assert 'dev/kaan/selfaware/SimpleVoiceChatIcon.class' in names
         assert 'dev/kaan/selfaware/SimpleVoiceChatPlugin.class' in names
+        assert 'dev/kaan/selfaware/SelfawareKeyBinding.class' in names
+        assert 'dev/kaan/selfaware/SelfawareKeyBindingImpl.class' in names
         assert not any(name.startswith('de/maxhenkel/voicechat/') for name in names)
-        assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
+        if target['loader'] in ['fabric', 'quilt']:
+            assert 'dev/kaan/selfaware/SelfawareModMenu.class' in names
+        else:
+            assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
         assert not any(name.startswith('com/terraformersmc/modmenu/') for name in names)
         assert not any(name.endswith('Test.class') for name in names)
         if 'refmap' in mixin:
@@ -44,21 +51,25 @@ def verify_jar(target):
             assert metadata['minecraft']['environment'] == 'client'
             assert metadata['quilt_loader']['version'] == version
             assert {'id': 'minecraft', 'versions': '=' + target['minecraft']} in metadata['quilt_loader']['depends']
+            assert any(dependency['id'] == 'modmenu' and dependency['versions'].startswith('>=')
+                       for dependency in metadata['quilt_loader']['depends'])
             assert metadata['quilt_loader']['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
-            assert 'modmenu' not in metadata['quilt_loader']['entrypoints']
+            assert metadata['quilt_loader']['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert 'fabric.mod.json' not in names
         elif target['loader'] == 'fabric':
             metadata = json.loads(archive.read('fabric.mod.json'))
             assert metadata['environment'] == 'client'
             assert metadata['depends']['minecraft'] == '=' + target['minecraft']
+            assert metadata['depends']['modmenu'].startswith('>=')
             assert metadata['version'] == version and metadata['id'] == 'selfaware'
             assert metadata['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
-            assert 'modmenu' not in metadata['entrypoints']
+            assert metadata['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert not any(name.endswith('.toml') for name in names)
         else:
             filename = 'META-INF/mods.toml' if target['loader'] == 'forge' or target['minecraft'] in ['1.20.2', '1.20.4'] else 'META-INF/neoforge.mods.toml'
             metadata = archive.read(filename).decode()
             assert '${' not in metadata and f'versionRange="[{target["minecraft"]}]"' in metadata
+            assert 'modmenu' not in metadata.lower()
             assert 'fabric.mod.json' not in names
         for name in names:
             if name.endswith('.class'):

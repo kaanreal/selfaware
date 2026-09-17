@@ -13,12 +13,20 @@ public final class SelfawareMenu {
         return Component.nullToEmpty("Done");
     }
 
+    public static void open() {
+        SelfawareMenuScreen.open();
+    }
+
     public static Component nametagLabel() {
         return Component.nullToEmpty("Nametag: " + onOff(SelfawareConfig.nametagEnabled()));
     }
 
     public static Component svcIconsLabel() {
         return Component.nullToEmpty("Simple Voice Chat icons: " + onOff(SelfawareConfig.svcIconsEnabled()));
+    }
+
+    public static boolean svcIconsAvailable() {
+        return SimpleVoiceChatPlugin.available();
     }
 
     public static void toggleNametag() {
@@ -37,8 +45,20 @@ public final class SelfawareMenu {
         SelfawareConfig.setServerFormattingEnabled(!SelfawareConfig.serverFormattingEnabled());
     }
 
+    public static Component donutRankLabel() {
+        return Component.nullToEmpty("DonutSMP rank: " + onOff(SelfawareConfig.donutRankEnabled()));
+    }
+
+    public static boolean donutRankAvailable() {
+        return ServerFormatting.isDonutServer();
+    }
+
+    public static void toggleDonutRank() {
+        SelfawareConfig.setDonutRankEnabled(!SelfawareConfig.donutRankEnabled());
+    }
+
     public static Component donutMoneyLabel() {
-        return Component.nullToEmpty("Donut money: " + onOff(SelfawareConfig.donutMoneyEnabled()));
+        return Component.nullToEmpty("DonutSMP money: " + onOff(SelfawareConfig.donutMoneyEnabled()));
     }
 
     public static boolean donutMoneyAvailable() {
@@ -47,6 +67,24 @@ public final class SelfawareMenu {
 
     public static void toggleDonutMoney() {
         SelfawareConfig.setDonutMoneyEnabled(!SelfawareConfig.donutMoneyEnabled());
+    }
+
+    public static int visibleRows() {
+        int rows = 2;
+        if (svcIconsAvailable()) {
+            rows++;
+        }
+        if (donutRankAvailable()) {
+            rows++;
+        }
+        if (donutMoneyAvailable()) {
+            rows++;
+        }
+        return rows;
+    }
+
+    public static int top(int height) {
+        return height / 2 - (visibleRows() * 26 + 8) / 2;
     }
 
     private static String onOff(boolean enabled) {
