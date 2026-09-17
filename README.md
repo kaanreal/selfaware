@@ -8,7 +8,7 @@ Install it on your client. Servers and other players don't need it. No Fabric AP
 
 When Simple Voice Chat is connected and idle, no icon is expected. The icon appears when you are talking, whispering, disconnected, or have voice chat disabled, matching Simple Voice Chat's normal player-name behavior.
 
-If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, open Selfaware from the Mods list. The settings screen uses simple vanilla buttons, and changes apply immediately and are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
+The settings screen uses simple vanilla buttons, and changes apply immediately and are saved in `config/selfaware.properties`. The SVC toggle is one global setting for every supported loader and version, and it has no effect when Simple Voice Chat is not installed.
 
 Turn on **Server formatting** to use your server-provided tab name, with your normal team-formatted name as the fallback. On 1.19.4 and newer, Selfaware learns the shadow and background of a nearby text-display nametag and remembers it for that server, so the style stays active after the other player leaves view. The separate **Donut money** option appears while connected to DonutSMP on 1.21.1. It reads your money from the tab footer and renders the name and balance as one Minecraft text display with one shared background. Both options default to off. Servers can send different formatting to different viewers, so this is a local approximation, not an exact preview of what everyone else sees.
 

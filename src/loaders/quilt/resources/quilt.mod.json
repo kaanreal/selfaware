@@ -11,8 +11,7 @@
       "contributors": {"Kaan": "Owner"}
     },
     "entrypoints": {
-      "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
-      "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
+      "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"]
     },
     "depends": [
       {"id": "quilt_loader", "versions": ">=${loaderVersion}"},

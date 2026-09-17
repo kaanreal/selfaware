@@ -4,7 +4,7 @@ Selfaware shows the local player's vanilla nametag in both third-person views. I
 
 The name must disappear in first person, with F1, when invisible or spectating. Other entities keep vanilla behavior, including team visibility. The local player follows vanilla's camera-entity exception for team visibility. Sneaking keeps vanilla distance and text rendering. Name formatting, team prefixes, and scoreboard text remain Minecraft's responsibility.
 
-Mod Menu opens Selfaware's settings screen. Every version uses the same compact vanilla button layout, with the Donut money button appearing only when its server integration is available. `SelfawareConfig` stores the nametag, Simple Voice Chat icon, server formatting, and Donut money settings in `config/selfaware.properties`, so the choices survive restarts and are shared by every version-specific jar. The SVC toggle is checked before the optional integration renders anything, and the nametag toggle is checked before the local name is selected.
+Selfaware's settings screen uses the same compact vanilla button layout on every version, with the Donut money button appearing only when its server integration is available. `SelfawareConfig` stores the nametag, Simple Voice Chat icon, server formatting, and Donut money settings in `config/selfaware.properties`, so the choices survive restarts and are shared by every version-specific jar. The SVC toggle is checked before the optional integration renders anything, and the nametag toggle is checked before the local name is selected.
 
 Each row in versions.json picks the Minecraft version, loader, Java level, and renderer adapter. Every target compiles the same feature code. Loader entrypoints only register the mod. An adapter changes when Minecraft changes a method signature.
 
@@ -16,7 +16,7 @@ The 1.21.10, 1.21.11, and 26.x renderers pass the nameplate pose into their icon
 
 The SVC smoke matrix resolves a released jar for each exact version and loader. Fabric and Quilt load that jar from the run directory because the published file contains nested API modules. Forge and NeoForge receive the same version through a remapped Maven runtime dependency. This keeps the compatibility test close to the way each loader actually resolves mods.
 
-Every declared target must build, and its jar must contain valid metadata and mixins. Fabric and Quilt compile against the matching Mod Menu API while Forge and NeoForge leave the menu integration out. The runtime checklist covers both F5 views, F1, first person, sneaking, invisibility, spectator mode, team visibility, and a second player. Compilation alone does not count as an in-game test.
+Every declared target must build, and its jar must contain valid metadata and mixins. The runtime checklist covers both F5 views, F1, first person, sneaking, invisibility, spectator mode, team visibility, and a second player. Compilation alone does not count as an in-game test.
 
 ## Reference notes
 

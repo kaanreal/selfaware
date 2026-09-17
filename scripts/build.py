@@ -34,10 +34,7 @@ def verify_jar(target):
         assert 'dev/kaan/selfaware/SimpleVoiceChatIcon.class' in names
         assert 'dev/kaan/selfaware/SimpleVoiceChatPlugin.class' in names
         assert not any(name.startswith('de/maxhenkel/voicechat/') for name in names)
-        if target['loader'] in ['fabric', 'quilt']:
-            assert 'dev/kaan/selfaware/SelfawareModMenu.class' in names
-        else:
-            assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
+        assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
         assert not any(name.startswith('com/terraformersmc/modmenu/') for name in names)
         assert not any(name.endswith('Test.class') for name in names)
         if 'refmap' in mixin:
@@ -48,7 +45,7 @@ def verify_jar(target):
             assert metadata['quilt_loader']['version'] == version
             assert {'id': 'minecraft', 'versions': '=' + target['minecraft']} in metadata['quilt_loader']['depends']
             assert metadata['quilt_loader']['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
-            assert metadata['quilt_loader']['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
+            assert 'modmenu' not in metadata['quilt_loader']['entrypoints']
             assert 'fabric.mod.json' not in names
         elif target['loader'] == 'fabric':
             metadata = json.loads(archive.read('fabric.mod.json'))
@@ -56,7 +53,7 @@ def verify_jar(target):
             assert metadata['depends']['minecraft'] == '=' + target['minecraft']
             assert metadata['version'] == version and metadata['id'] == 'selfaware'
             assert metadata['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
-            assert metadata['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
+            assert 'modmenu' not in metadata['entrypoints']
             assert not any(name.endswith('.toml') for name in names)
         else:
             filename = 'META-INF/mods.toml' if target['loader'] == 'forge' or target['minecraft'] in ['1.20.2', '1.20.4'] else 'META-INF/neoforge.mods.toml'

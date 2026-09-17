@@ -7,8 +7,7 @@
   "authors": ["Kaan"],
   "environment": "client",
   "entrypoints": {
-    "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
-    "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
+    "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"]
   },
   "mixins": ["selfaware.mixins.json"],
   "depends": {
