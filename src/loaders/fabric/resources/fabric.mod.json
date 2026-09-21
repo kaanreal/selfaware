@@ -7,6 +7,7 @@
   "authors": ["Kaan"],
   "environment": "client",
   "entrypoints": {
+    "client": ["dev.kaan.selfaware.SelfawareClient"],
     "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
     "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
   },
@@ -15,6 +16,7 @@
     "fabricloader": ">=${loaderVersion}",
     "minecraft": "=${minecraft}",
     "java": ">=${java}",
+    "fabric-api": ">=${fabricApiVersion}",
     "modmenu": ">=${modMenuVersion}"
   }
 }

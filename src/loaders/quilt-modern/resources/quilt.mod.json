@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "dev.kaan",
+    "id": "selfaware",
+    "version": "${version}",
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "metadata": {
+      "name": "Selfaware",
+      "description": "See your own nametag in third person.",
+      "contributors": {"Kaan": "Owner"}
+    },
+    "entrypoints": {
+      "client": ["dev.kaan.selfaware.SelfawareClient"],
+      "voicechat": ["dev.kaan.selfaware.SimpleVoiceChatPlugin"],
+      "modmenu": ["dev.kaan.selfaware.SelfawareModMenu"]
+    },
+    "depends": [
+      {"id": "quilt_loader", "versions": ">=${loaderVersion}"},
+      {"id": "minecraft", "versions": "=${minecraft}"},
+      {"id": "java", "versions": ">=${java}"},
+      {"id": "modmenu", "versions": ">=${modMenuVersion}"}
+    ]
+  },
+  "minecraft": {"environment": "client"},
+  "mixin": "selfaware.mixins.json"
+}

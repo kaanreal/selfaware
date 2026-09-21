@@ -1,6 +1,5 @@
 package dev.kaan.selfaware;
 
-import dev.kaan.selfaware.mixin.TabOverlayAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -14,15 +13,16 @@ import java.util.regex.Pattern;
 public final class ServerFormattingScore {
     private static final Pattern MONEY = Pattern.compile("\\$\\s*([0-9]+(?:[.,][0-9]+)?)\\s*([KMBT]?)",
             Pattern.CASE_INSENSITIVE);
+    private static Component tabFooter;
 
     private ServerFormattingScore() {}
 
     public static Component fromTab(Minecraft client) {
-        if (client.gui == null) {
-            return null;
-        }
-        Component footer = ((TabOverlayAccessor) client.gui.getTabList()).selfaware$getFooter();
-        return footer == null ? null : moneyText(footer.getString(), ServerFormatting.sampledText());
+        return tabFooter == null ? null : moneyText(tabFooter.getString(), ServerFormatting.sampledText());
+    }
+
+    public static void rememberTabFooter(Component footer) {
+        tabFooter = footer == null ? null : footer.copy();
     }
 
     static Component moneyText(String text) {
@@ -60,7 +60,7 @@ public final class ServerFormattingScore {
     }
 
     static Component textDisplayValue(Component name, Component money) {
-        return name.copy().append(Component.literal("\n")).append(money.copy());
+        return ServerFormatting.nameWithMoney(name, money);
     }
 
     static Integer parseMoneyValue(String text) {

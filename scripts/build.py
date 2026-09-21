@@ -2,6 +2,7 @@
 """Build the selected targets and check each distributable jar."""
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -24,9 +25,10 @@ def verify_jar(target):
                            'SelfawareMinecraftMixin', 'SelfawareOptionsMixin', 'SelfawareChatScreenMixin']
         if target['minecraft'] not in ['1.16.5', '1.18.2', '1.19.2']:
             expected_mixins += ['TextDisplayAccessor', 'NameTagFormattingMixin']
-        if target['minecraft'] == '1.21.1':
-            expected_mixins += ['TabOverlayAccessor', 'TextDisplay21Accessor', 'Display21Accessor',
-                                'PlayerRendererMixin']
+        if target['minecraft'] in ['1.21.1', '26.2']:
+            expected_mixins += ['TextDisplayRendererMixin', 'TabOverlayAccessor']
+        elif target['minecraft'] == '1.21.11':
+            expected_mixins += ['TabOverlayAccessor']
         assert mixin['client'] == expected_mixins and not mixin.get('mixins')
         assert 'dev/kaan/selfaware/mixin/PauseScreenMixin.class' not in names
         for name in ['NameTagVisibility', 'SelfNameTag']:
@@ -40,8 +42,10 @@ def verify_jar(target):
         assert not any(name.startswith('de/maxhenkel/voicechat/') for name in names)
         if target['loader'] in ['fabric', 'quilt']:
             assert 'dev/kaan/selfaware/SelfawareModMenu.class' in names
+            assert 'dev/kaan/selfaware/SelfawareClient.class' in names
         else:
             assert 'dev/kaan/selfaware/SelfawareModMenu.class' not in names
+            assert 'dev/kaan/selfaware/SelfawareCommandRegistration.class' in names
         assert not any(name.startswith('com/terraformersmc/modmenu/') for name in names)
         assert not any(name.endswith('Test.class') for name in names)
         if 'refmap' in mixin:
@@ -53,6 +57,13 @@ def verify_jar(target):
             assert {'id': 'minecraft', 'versions': '=' + target['minecraft']} in metadata['quilt_loader']['depends']
             assert any(dependency['id'] == 'modmenu' and dependency['versions'].startswith('>=')
                        for dependency in metadata['quilt_loader']['depends'])
+            if target['minecraft'].startswith('26.'):
+                assert not any(dependency['id'] == 'fabric-api'
+                               for dependency in metadata['quilt_loader']['depends'])
+            else:
+                assert any(dependency['id'] == 'fabric-api' and dependency['versions'].startswith('>=')
+                           for dependency in metadata['quilt_loader']['depends'])
+            assert metadata['quilt_loader']['entrypoints']['client'] == ['dev.kaan.selfaware.SelfawareClient']
             assert metadata['quilt_loader']['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
             assert metadata['quilt_loader']['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert 'fabric.mod.json' not in names
@@ -62,6 +73,11 @@ def verify_jar(target):
             assert metadata['depends']['minecraft'] == '=' + target['minecraft']
             assert metadata['depends']['modmenu'].startswith('>=')
             assert metadata['version'] == version and metadata['id'] == 'selfaware'
+            if target['minecraft'].startswith('26.'):
+                assert 'fabric-api' not in metadata['depends']
+            else:
+                assert metadata['depends']['fabric-api'].startswith('>=')
+            assert metadata['entrypoints']['client'] == ['dev.kaan.selfaware.SelfawareClient']
             assert metadata['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
             assert metadata['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']
             assert not any(name.endswith('.toml') for name in names)
@@ -107,7 +123,8 @@ def main():
         log = log_dir / (identifier + '.log')
         try:
             if not args.verify_only:
-                command = [str(ROOT / 'gradlew'), 'clean', 'build', f'-Ptarget={identifier}', '--console=plain']
+                wrapper = ROOT / ('gradlew.bat' if os.name == 'nt' else 'gradlew')
+                command = [str(wrapper), 'clean', 'build', f'-Ptarget={identifier}', '--console=plain']
                 if target['loader'] == 'neoforge' and target['minecraft'].startswith('26.'):
                     # NeoGradle adds an empty game-test task that downloads runtime assets and can hang in CI.
                     command += ['-x', 'testJunit']

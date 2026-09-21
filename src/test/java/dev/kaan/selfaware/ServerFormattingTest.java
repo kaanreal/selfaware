@@ -34,9 +34,16 @@ class ServerFormattingTest {
     }
 
     @Test
-    void onlyActivatesDonutRankOnDonutServer() {
-        assertTrue(ServerFormatting.donutRankActive(true, true));
-        assertFalse(ServerFormatting.donutRankActive(true, false));
-        assertFalse(ServerFormatting.donutRankActive(false, true));
+    void donutRankUsesTheTabNameOnlyWhileEnabled() {
+        Component plain = Component.nullToEmpty("kaanreal");
+        Component tab = Component.nullToEmpty("[VIP] kaanreal");
+
+        Component disabled = ServerFormatting.selectDonutName(plain, tab, false);
+        Component enabled = ServerFormatting.selectDonutName(plain, tab, true);
+
+        assertEquals(plain, disabled);
+        assertNotSame(plain, disabled);
+        assertEquals(tab, enabled);
+        assertNotSame(tab, enabled);
     }
 }

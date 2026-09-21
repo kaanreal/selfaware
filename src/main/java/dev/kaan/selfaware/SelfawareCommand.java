@@ -10,4 +10,9 @@ public final class SelfawareCommand {
     public static void open() {
         SelfawareMenu.open();
     }
+
+    public static int execute() {
+        open();
+        return 1;
+    }
 }

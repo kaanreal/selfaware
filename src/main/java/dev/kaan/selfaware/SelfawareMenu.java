@@ -26,7 +26,7 @@ public final class SelfawareMenu {
     }
 
     public static boolean svcIconsAvailable() {
-        return SimpleVoiceChatPlugin.available();
+        return SimpleVoiceChatAvailability.available();
     }
 
     public static void toggleNametag() {

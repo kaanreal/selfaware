@@ -94,7 +94,12 @@ def kill_process(process):
             except ProcessLookupError:
                 pass
     else:
-        process.terminate()
+        subprocess.run(
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
         try:
             process.wait(timeout=5)
         except subprocess.TimeoutExpired:
@@ -135,7 +140,8 @@ def inspect_target(target_id, output, voicechat, started_ns):
 def run_target(target_id, timeout, logs_dir, known_targets, svc=None):
     voicechat = svc is not None or has_voicechat(target_id)
     output_path = logs_dir / f"{target_id}.log"
-    command = [str(ROOT / "gradlew"), "runClient", f"-Ptarget={target_id}", "-Psmoke", "--console=plain"]
+    wrapper = ROOT / ("gradlew.bat" if os.name == "nt" else "gradlew")
+    command = [str(wrapper), "runClient", f"-Ptarget={target_id}", "-Psmoke", "--console=plain", "--no-daemon"]
     target = known_targets[target_id]
     if svc and target["loader"] not in ["fabric", "quilt"]:
         command.append(f"-PsvcVersion={svc['id']}")

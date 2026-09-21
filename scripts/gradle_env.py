@@ -15,6 +15,11 @@ def for_gradle():
         Path("/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home"),
         Path("/usr/local/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home"),
     ]
+    if os.name == "nt":
+        candidates.extend(sorted(
+            (Path.home() / ".gradle" / "jdks").glob("*-25-*-windows.*"),
+            reverse=True,
+        ))
     brew = shutil.which("brew")
     if brew:
         try:
@@ -42,8 +47,9 @@ def for_gradle():
         except (OSError, subprocess.SubprocessError):
             pass
 
+    java_name = "java.exe" if os.name == "nt" else "java"
     for candidate in candidates:
-        if (candidate / "bin/java").is_file():
+        if (candidate / "bin" / java_name).is_file():
             env["JAVA_HOME"] = str(candidate)
             break
     return env

@@ -15,8 +15,7 @@ public final class SelfNameTag {
             return false;
         }
         Minecraft client = Minecraft.getInstance();
-        // Some servers send a separate text-display nameplate for the local player.
-        // Leave that native plate alone instead of drawing a second vanilla label.
+        // A server text display owns this plate. Its renderer applies the local settings.
         if (ServerFormatting.hasOwnTextDisplay()) {
             return false;
         }

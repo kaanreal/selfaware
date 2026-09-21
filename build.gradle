@@ -15,6 +15,7 @@ layout.buildDirectory = clientRun ? file('build') : file("build/${target.id}")
 
 repositories {
     mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
     maven { url = 'https://api.modrinth.com/maven' }
     maven { url = 'https://maven.neoforged.net/releases/' }
     maven { url = 'https://maven.quiltmc.org/repository/release/' }
@@ -46,30 +47,39 @@ def textDisplays = !(target.minecraft in ['1.16.5', '1.18.2', '1.19.2'])
 def formatAdapter = target.minecraft == '1.21.8' ? 'drawvoid'
         : target.minecraft == '26.2' ? 'submit26'
         : target.minecraft.startsWith('26.') ? 'submit261'
-        : target.minecraft in ['1.21.10', '1.21.11'] ? 'submit'
+        : target.minecraft == '1.21.10' ? 'submit210'
+        : target.minecraft == '1.21.11' ? 'submit'
         : 'draw'
 def formattingMixins = textDisplays ? ', "TextDisplayAccessor", "NameTagFormattingMixin"' : ''
-if (target.minecraft == '1.21.1') formattingMixins += ', "TabOverlayAccessor", "TextDisplay21Accessor", "Display21Accessor", "PlayerRendererMixin"'
+if (target.minecraft in ['1.21.1', '26.2']) formattingMixins += ', "TextDisplayRendererMixin", "TabOverlayAccessor"'
+else if (target.minecraft == '1.21.11') formattingMixins += ', "TabOverlayAccessor"'
 sourceSets.main.java.srcDirs = ['src/main/java', "src/adapters/${target.adapter}/java"]
 sourceSets.main.java.srcDir "src/adapters/formatting/${textDisplays ? 'display' : 'no-display'}/java"
 if (textDisplays) sourceSets.main.java.srcDir "src/adapters/formatting/${formatAdapter}/java"
 if (target.minecraft == '1.21.1') sourceSets.main.java.srcDir 'src/adapters/formatting/scoreboard21/java'
 if (target.minecraft == '1.21.1') sourceSets.test.java.srcDir 'src/adapters/formatting/scoreboard21/test'
-sourceSets.main.java.srcDir "src/adapters/donut-money/${target.minecraft == '1.21.1' ? 'enabled' : 'disabled'}/java"
+def donutMoneyAdapter = target.minecraft == '1.21.1' ? 'enabled'
+        : target.minecraft == '1.21.11' ? 'modern26'
+        : target.minecraft == '26.2' ? 'modern26' : 'disabled'
+sourceSets.main.java.srcDir "src/adapters/donut-money/${donutMoneyAdapter}/java"
 def menuAdapter = target.minecraft == '1.16.5' ? 'menu16'
         : target.minecraft in ['1.18.2', '1.19.2'] ? 'menu18'
         : target.minecraft == '1.19.4' ? 'menu19'
         : target.minecraft.startsWith('26.1') ? 'menu261'
         : target.minecraft.startsWith('26.') ? 'menu26'
+        : target.minecraft in ['1.21.10', '1.21.11'] ? 'menu2110'
         : target.minecraft == '1.20.1' ? 'menu20'
         : 'menu21'
 sourceSets.main.java.srcDir "src/adapters/menu/${menuAdapter}/java"
 def keybindAdapter = target.minecraft in ['1.21.10', '1.21.11'] || modern ? 'modern' : 'legacy'
 sourceSets.main.java.srcDir "src/adapters/keybind/${keybindAdapter}/java"
-def commandAdapter = modern ? 'modern' : 'legacy'
+def commandAdapter = target.minecraft in ['1.21.10', '1.21.11'] || modern ? 'modern' : 'legacy'
 sourceSets.main.java.srcDir "src/adapters/command/${commandAdapter}/java"
 if (target.loader in ['fabric', 'quilt']) {
     sourceSets.main.java.srcDir 'src/adapters/modmenu/java'
+    def fabricCommandAdapter = modern ? 'fabric-modern'
+            : target.minecraft in ['1.16.5', '1.18.2'] ? 'fabric-v1' : 'fabric-v2'
+    sourceSets.main.java.srcDir "src/adapters/command/${fabricCommandAdapter}/java"
 }
 def voicechatAdapter = target.minecraft == '1.21.1' ? 'partial'
         : target.minecraft == '1.21.10' ? 'modern2110'
@@ -82,11 +92,22 @@ sourceSets.main.java.srcDir "src/adapters/voicechat/${voicechatAdapter}/java"
 sourceSets.main.java.srcDir target.minecraft == '26.2' ? 'src/adapters/hud/java' : 'src/adapters/options/java'
 if (target.loader in ['forge', 'neoforge']) {
     sourceSets.main.java.srcDir "src/loaders/${target.loader}/java"
+    if (target.loader == 'forge') {
+        def forgeCommandAdapter = target.minecraft == '1.16.5' ? 'forge16'
+                : target.minecraft in ['1.21.8', '1.21.10'] ? 'forge2110' : 'forge18'
+        sourceSets.main.java.srcDir "src/adapters/command/${forgeCommandAdapter}/java"
+    } else {
+        sourceSets.main.java.srcDir 'src/adapters/command/neoforge/java'
+    }
 }
-sourceSets.main.resources.srcDirs = ['src/main/resources', "src/loaders/${target.loader}/resources"]
+def loaderResources = modern && target.loader in ['fabric', 'quilt']
+        ? "src/loaders/${target.loader}-modern/resources"
+        : "src/loaders/${target.loader}/resources"
+sourceSets.main.resources.srcDirs = ['src/main/resources', loaderResources]
 
 def needsRefmap = !modern && (target.loader in ['fabric', 'quilt'] || (target.loader == 'forge' && target.java < 21))
 def modMenuVersion = null
+def fabricApiVersion = null
 if (!neoGradle) {
     loom {
         mods {
@@ -154,8 +175,32 @@ dependencies {
         if (modMenuVersion == null) {
             throw new GradleException("No Mod Menu version is configured for ${target.minecraft}")
         }
-        if (modern) implementation "maven.modrinth:modmenu:${modMenuVersion}"
-        else modCompileOnly "maven.modrinth:modmenu:${modMenuVersion}"
+        if (modern) {
+            implementation "maven.modrinth:modmenu:${modMenuVersion}"
+        } else {
+            def fabricApiVersions = [
+                    '1.16.5': '0.42.0+1.16',
+                    '1.18.2': '0.77.0+1.18.2',
+                    '1.19.2': '0.77.0+1.19.2',
+                    '1.19.4': '0.87.2+1.19.4',
+                    '1.20.1': '0.92.12+1.20.1',
+                    '1.20.2': '0.91.6+1.20.2',
+                    '1.20.4': '0.97.3+1.20.4',
+                    '1.20.6': '0.100.8+1.20.6',
+                    '1.21.1': '0.116.17+1.21.1',
+                    '1.21.3': '0.114.1+1.21.3',
+                    '1.21.4': '0.119.4+1.21.4',
+                    '1.21.5': '0.128.2+1.21.5',
+                    '1.21.8': '0.136.1+1.21.8',
+                    '1.21.10': '0.138.4+1.21.10',
+                    '1.21.11': '0.141.6+1.21.11'
+            ]
+            fabricApiVersion = fabricApiVersions[target.minecraft]
+            modCompileOnly "maven.modrinth:modmenu:${modMenuVersion}"
+            modLocalRuntime "maven.modrinth:modmenu:${modMenuVersion}"
+            modCompileOnly "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+            modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+        }
     }
     def svcVersion = providers.gradleProperty('svcVersion').orNull
     if (svcVersion) {
@@ -192,6 +237,7 @@ processResources {
     def values = [version: project.version, minecraft: target.minecraft, java: target.java,
                   formattingMixins: formattingMixins,
                   loaderVersion: target.loaderVersion, modMenuVersion: modMenuVersion ?: '',
+                  fabricApiVersion: fabricApiVersion ?: '',
                   refmap: needsRefmap ? '"refmap": "selfaware.refmap.json",' : '']
     inputs.properties(values)
     filesMatching(['fabric.mod.json', 'quilt.mod.json', 'META-INF/*.toml', 'selfaware.mixins.json']) { expand(values) }

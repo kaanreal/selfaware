@@ -26,6 +26,16 @@ class ServerFormattingScoreTest {
     }
 
     @Test
+    void remembersMoneySentToTheTabFooter() {
+        ServerFormattingScore.rememberTabFooter(Component.literal("$ 196M / 105 ms"));
+
+        assertEquals("$ 196M", ServerFormattingScore.fromTab(null).getString());
+
+        ServerFormattingScore.rememberTabFooter(null);
+        assertNull(ServerFormattingScore.fromTab(null));
+    }
+
+    @Test
     void combinesTheNameAndMoneyIntoOneTextDisplayValue() {
         Component name = Component.literal("+").withStyle(ChatFormatting.AQUA)
                 .append(Component.literal("Kaanreal").withStyle(ChatFormatting.WHITE));

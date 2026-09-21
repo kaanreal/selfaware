@@ -16,6 +16,7 @@ public final class ServerFormatting {
     private static Appearance appearance;
     private static Component sampledText;
     private static Entity sampledDisplay;
+    private static Entity ownDisplayEntity;
     private static boolean ownDisplay;
     private static Object world;
     private static String server;
@@ -30,21 +31,18 @@ public final class ServerFormatting {
         if (entity != client.player) {
             return vanilla;
         }
-        boolean serverFormatting = SelfawareConfig.serverFormattingEnabled();
-        boolean donutRank = donutRankActive(SelfawareConfig.donutRankEnabled(), isDonutServer(client));
-        boolean donutMoney = SelfawareConfig.donutMoneyEnabled() && isDonutServer(client);
-        if (!serverFormatting && !donutRank && !donutMoney) {
+        boolean donutServer = isDonutServer(client);
+        if (!donutServer && !SelfawareConfig.serverFormattingEnabled()) {
             return vanilla;
         }
         appearance = findAppearance(client);
-        if (!serverFormatting && !donutRank) {
-            return vanilla;
-        }
         PlayerInfo info = client.getConnection() == null ? null
                 : client.getConnection().getPlayerInfo(entity.getUUID());
         // A tab-list component belongs to this player, but can differ from the overhead name.
         Component tab = info == null ? null : info.getTabListDisplayName();
-        ownName = selectName(vanilla, tab);
+        ownName = donutServer
+                ? selectDonutName(entity.getName(), tab, SelfawareConfig.donutRankEnabled())
+                : selectName(vanilla, tab);
         return ownName;
     }
 
@@ -68,12 +66,12 @@ public final class ServerFormatting {
         return host.equals("donutsmp.net") || host.endsWith(".donutsmp.net");
     }
 
-    static boolean donutRankActive(boolean enabled, boolean donutServer) {
-        return enabled && donutServer;
-    }
-
     static Component selectName(Component vanilla, Component tab) {
         return (tab == null || tab.getString().trim().isEmpty() ? vanilla : tab).copy();
+    }
+
+    static Component selectDonutName(Component plain, Component tab, boolean rankEnabled) {
+        return rankEnabled ? selectName(plain, tab) : plain.copy();
     }
 
     private static Appearance findAppearance(Minecraft client) {
@@ -84,6 +82,7 @@ public final class ServerFormatting {
             cached = null;
             sampledText = null;
             sampledDisplay = null;
+            ownDisplayEntity = null;
             ownDisplay = false;
             return null;
         }
@@ -96,6 +95,7 @@ public final class ServerFormatting {
             cached = loadCachedAppearance(currentServer);
             sampledText = null;
             sampledDisplay = null;
+            ownDisplayEntity = null;
             ownDisplay = false;
         }
         if (checkedTick == client.player.tickCount) {
@@ -104,10 +104,12 @@ public final class ServerFormatting {
         checkedTick = client.player.tickCount;
         if (!ServerTextDisplays.available()) {
             ownDisplay = false;
+            ownDisplayEntity = null;
             return cached;
         }
 
         ownDisplay = false;
+        ownDisplayEntity = null;
         double closest = 32 * 32;
         Appearance observed = null;
         for (Entity entity : client.level.entitiesForRendering()) {
@@ -133,6 +135,12 @@ public final class ServerFormatting {
                 }
                 if (player == client.player) {
                     ownDisplay = true;
+                    ownDisplayEntity = entity;
+                    observed = display.appearance;
+                    sampledText = display.text.copy();
+                    sampledDisplay = entity;
+                    closest = -1;
+                    break;
                 }
                 if (distance >= closest) {
                     continue;
@@ -196,13 +204,72 @@ public final class ServerFormatting {
         return ownDisplay;
     }
 
-    public static Appearance observedAppearance() {
-        return appearance;
+    public static TextDisplayOverride textDisplayOverride(Entity entity) {
+        Minecraft client = Minecraft.getInstance();
+        appearance = findAppearance(client);
+        if (client.player == null || entity != ownDisplayEntity) {
+            return null;
+        }
+        if (!SelfawareConfig.nametagEnabled()) {
+            return TextDisplayOverride.hidden();
+        }
+
+        boolean serverAppearance = SelfawareConfig.serverFormattingEnabled();
+        if (!isDonutServer(client)) {
+            return serverAppearance ? TextDisplayOverride.unchanged()
+                    : TextDisplayOverride.text(client.player.getName().copy(), false);
+        }
+
+        PlayerInfo info = client.getConnection() == null ? null
+                : client.getConnection().getPlayerInfo(client.player.getUUID());
+        Component tab = info == null ? null : info.getTabListDisplayName();
+        Component text = selectDonutName(client.player.getName(), tab, SelfawareConfig.donutRankEnabled());
+        if (SelfawareConfig.donutMoneyEnabled()) {
+            Component money = DonutMoneySupport.previewMoney();
+            if (money != null) {
+                text = nameWithMoney(text, money);
+            }
+        }
+        return TextDisplayOverride.text(text, serverAppearance);
+    }
+
+    public static Component nameWithMoney(Component name, Component money) {
+        return name.copy().append(Component.nullToEmpty("\n")).append(money.copy());
+    }
+
+    public static Component donutMoney(Component name) {
+        if (name != ownName || ownDisplay || !SelfawareConfig.donutMoneyEnabled() || !isDonutServer()) {
+            return null;
+        }
+        return DonutMoneySupport.previewMoney();
     }
 
     public static Appearance appearance(Component text) {
-        boolean donutRank = donutRankActive(SelfawareConfig.donutRankEnabled(), isDonutServer());
-        return (SelfawareConfig.serverFormattingEnabled() || donutRank) && text == ownName ? appearance : null;
+        return SelfawareConfig.serverFormattingEnabled() && text == ownName ? appearance : null;
+    }
+
+    public static final class TextDisplayOverride {
+        public final Component text;
+        public final boolean hidden;
+        public final boolean serverAppearance;
+
+        private TextDisplayOverride(Component text, boolean hidden, boolean serverAppearance) {
+            this.text = text;
+            this.hidden = hidden;
+            this.serverAppearance = serverAppearance;
+        }
+
+        private static TextDisplayOverride hidden() {
+            return new TextDisplayOverride(null, true, false);
+        }
+
+        private static TextDisplayOverride unchanged() {
+            return new TextDisplayOverride(null, false, true);
+        }
+
+        private static TextDisplayOverride text(Component text, boolean serverAppearance) {
+            return new TextDisplayOverride(text, false, serverAppearance);
+        }
     }
 
     public static final class Appearance {
