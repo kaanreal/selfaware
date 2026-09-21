@@ -19,6 +19,7 @@ def verify_jar(target):
     jar = ROOT / 'build' / target['id'] / 'libs' / f"selfaware-{target['id']}-{version}.jar"
     with zipfile.ZipFile(jar) as archive:
         names = archive.namelist()
+        fabric_api_id = 'fabric' if target['minecraft'] == '1.16.5' else 'fabric-api'
         mixin = json.loads(archive.read('selfaware.mixins.json'))
         assert mixin['required'] and mixin['injectors']['defaultRequire'] == 1
         expected_mixins = ['LivingEntityRendererMixin', 'SimpleVoiceChatRenderEventsMixin', 'EntityRendererMixin',
@@ -61,7 +62,7 @@ def verify_jar(target):
                 assert not any(dependency['id'] == 'fabric-api'
                                for dependency in metadata['quilt_loader']['depends'])
             else:
-                assert any(dependency['id'] == 'fabric-api' and dependency['versions'].startswith('>=')
+                assert any(dependency['id'] == fabric_api_id and dependency['versions'].startswith('>=')
                            for dependency in metadata['quilt_loader']['depends'])
             assert metadata['quilt_loader']['entrypoints']['client'] == ['dev.kaan.selfaware.SelfawareClient']
             assert metadata['quilt_loader']['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
@@ -76,7 +77,7 @@ def verify_jar(target):
             if target['minecraft'].startswith('26.'):
                 assert 'fabric-api' not in metadata['depends']
             else:
-                assert metadata['depends']['fabric-api'].startswith('>=')
+                assert metadata['depends'][fabric_api_id].startswith('>=')
             assert metadata['entrypoints']['client'] == ['dev.kaan.selfaware.SelfawareClient']
             assert metadata['entrypoints']['voicechat'] == ['dev.kaan.selfaware.SimpleVoiceChatPlugin']
             assert metadata['entrypoints']['modmenu'] == ['dev.kaan.selfaware.SelfawareModMenu']

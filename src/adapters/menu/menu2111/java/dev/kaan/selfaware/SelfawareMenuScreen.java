@@ -1,8 +1,7 @@
 package dev.kaan.selfaware;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -30,33 +29,32 @@ public final class SelfawareMenuScreen extends Screen {
     protected void init() {
         int x = SelfawareMenu.buttonLeft(width);
         int buttonWidth = SelfawareMenu.buttonWidth(width);
-        int buttonHeight = SelfawareMenu.rowHeight(height);
         nametagButton = transparent(Button.builder(SelfawareMenu.nametagLabel(), button -> {
             SelfawareMenu.toggleNametag();
             nametagButton.setMessage(SelfawareMenu.nametagLabel());
-        }).bounds(x, SelfawareMenu.rowY(height, 0), buttonWidth, buttonHeight).build());
+        }).bounds(x, SelfawareMenu.rowY(height, 0), buttonWidth, SelfawareMenu.rowHeight(height)).build());
         svcIconsButton = transparent(Button.builder(SelfawareMenu.svcIconsLabel(), button -> {
             SelfawareMenu.toggleSvcIcons();
             svcIconsButton.setMessage(SelfawareMenu.svcIconsLabel());
-        }).bounds(x, SelfawareMenu.rowY(height, 1), buttonWidth, buttonHeight).build());
+        }).bounds(x, SelfawareMenu.rowY(height, 1), buttonWidth, SelfawareMenu.rowHeight(height)).build());
         svcIconsButton.active = SelfawareMenu.svcIconsAvailable();
         serverFormattingButton = transparent(Button.builder(SelfawareMenu.serverFormattingLabel(), button -> {
             SelfawareMenu.toggleServerFormatting();
             serverFormattingButton.setMessage(SelfawareMenu.serverFormattingLabel());
-        }).bounds(x, SelfawareMenu.rowY(height, 2), buttonWidth, buttonHeight).build());
+        }).bounds(x, SelfawareMenu.rowY(height, 2), buttonWidth, SelfawareMenu.rowHeight(height)).build());
         Button donutRankButton = transparent(Button.builder(SelfawareMenu.donutRankLabel(), button -> {
             SelfawareMenu.toggleDonutRank();
             button.setMessage(SelfawareMenu.donutRankLabel());
-        }).bounds(x, SelfawareMenu.rowY(height, 3), buttonWidth, buttonHeight).build());
+        }).bounds(x, SelfawareMenu.rowY(height, 3), buttonWidth, SelfawareMenu.rowHeight(height)).build());
         donutRankButton.active = SelfawareMenu.donutRankAvailable();
         donutMoneyButton = transparent(Button.builder(SelfawareMenu.donutMoneyLabel(), button -> {
             SelfawareMenu.toggleDonutMoney();
             donutMoneyButton.setMessage(SelfawareMenu.donutMoneyLabel());
-        }).bounds(x, SelfawareMenu.rowY(height, 4), buttonWidth, buttonHeight).build());
+        }).bounds(x, SelfawareMenu.rowY(height, 4), buttonWidth, SelfawareMenu.rowHeight(height)).build());
         donutMoneyButton.active = SelfawareMenu.donutMoneyAvailable();
         transparent(Button.builder(SelfawareMenu.doneLabel(), button -> onClose())
                 .bounds(SelfawareMenu.doneLeft(width), SelfawareMenu.doneY(height),
-                        SelfawareMenu.doneWidth(width), buttonHeight).build());
+                        SelfawareMenu.doneWidth(width), SelfawareMenu.rowHeight(height)).build());
     }
 
     private Button transparent(Button button) {
@@ -70,11 +68,10 @@ public final class SelfawareMenuScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(poseStack);
-        SelfawareMenuPreviewRenderer.render(poseStack, font, width, height, mouseX, mouseY,
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        SelfawareMenuPreviewRenderer.render(graphics, font, width, height, mouseX, mouseY,
                 SelfawareMenu.openingSpin(openedAt));
-        GuiComponent.drawCenteredString(poseStack, font, SelfawareMenu.title(), width / 2, 14, 0xFFFFFF);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        graphics.drawCenteredString(font, SelfawareMenu.title(), width / 2, 14, 0xFFFFFF);
+        super.render(graphics, mouseX, mouseY, partialTicks);
     }
 }

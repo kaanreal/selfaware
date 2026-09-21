@@ -24,7 +24,8 @@ public final class SelfawareMenu {
     }
 
     public static Component svcIconsLabel() {
-        return Component.nullToEmpty("Simple Voice Chat icons: " + onOff(SelfawareConfig.svcIconsEnabled()));
+        return Component.nullToEmpty("Simple Voice Chat icons: "
+                + (svcIconsAvailable() ? onOff(SelfawareConfig.svcIconsEnabled()) : "UNAVAILABLE"));
     }
 
     public static boolean svcIconsAvailable() {
@@ -48,7 +49,8 @@ public final class SelfawareMenu {
     }
 
     public static Component donutRankLabel() {
-        return Component.nullToEmpty("DonutSMP rank: " + onOff(SelfawareConfig.donutRankEnabled()));
+        return Component.nullToEmpty("DonutSMP rank: "
+                + (donutRankAvailable() ? onOff(SelfawareConfig.donutRankEnabled()) : "UNAVAILABLE"));
     }
 
     public static boolean donutRankAvailable() {
@@ -60,7 +62,8 @@ public final class SelfawareMenu {
     }
 
     public static Component donutMoneyLabel() {
-        return Component.nullToEmpty("DonutSMP money: " + onOff(SelfawareConfig.donutMoneyEnabled()));
+        return Component.nullToEmpty("DonutSMP money: "
+                + (donutMoneyAvailable() ? onOff(SelfawareConfig.donutMoneyEnabled()) : "UNAVAILABLE"));
     }
 
     public static boolean donutMoneyAvailable() {
@@ -72,45 +75,92 @@ public final class SelfawareMenu {
     }
 
     public static int visibleRows() {
-        int rows = 3;
-        if (svcIconsAvailable()) {
-            rows++;
-        }
-        if (donutRankAvailable()) {
-            rows++;
-        }
-        if (donutMoneyAvailable()) {
-            rows++;
-        }
-        return rows;
+        return 6;
     }
 
     public static int top(int height) {
-        return height / 2 - (visibleRows() * 26 + 8) / 2;
+        int controlsHeight = rowStep(height) * 5 + 8 + rowHeight(height);
+        int availableTop = previewTop() + 34;
+        int availableHeight = Math.max(controlsHeight, previewBottom(height) - availableTop);
+        return availableTop + Math.max(0, (availableHeight - controlsHeight) / 2);
+    }
+
+    public static int contentLeft(int width) {
+        return (width - contentWidth(width)) / 2;
+    }
+
+    public static int contentWidth(int width) {
+        return Math.min(1100, Math.max(0, width - 24));
     }
 
     public static int optionsLeft(int width) {
-        return width / 2 + 12;
+        return contentLeft(width) + contentWidth(width) / 2 + columnGap(width) / 2;
     }
 
     public static int optionsWidth(int width) {
-        return Math.max(180, Math.min(280, width - optionsLeft(width) - 24));
+        return Math.max(0, contentLeft(width) + contentWidth(width) - optionsLeft(width));
     }
 
-    public static int previewLeft() {
-        return 24;
+    public static int buttonLeft(int width) {
+        return optionsLeft(width) + Math.max(8, (optionsWidth(width) - buttonWidth(width)) / 2);
+    }
+
+    public static int buttonWidth(int width) {
+        return Math.min(360, Math.max(0, optionsWidth(width) - 16));
+    }
+
+    public static int rowY(int height, int row) {
+        return top(height) + row * rowStep(height);
+    }
+
+    public static int rowHeight(int height) {
+        return height < 340 ? 20 : 30;
+    }
+
+    public static int rowStep(int height) {
+        return height < 340 ? 24 : 38;
+    }
+
+    public static int doneY(int height) {
+        return rowY(height, 5) + 8;
+    }
+
+    public static int doneWidth(int width) {
+        return Math.min(160, buttonWidth(width));
+    }
+
+    public static int doneLeft(int width) {
+        return optionsLeft(width) + (optionsWidth(width) - doneWidth(width)) / 2;
+    }
+
+    public static float openingSpin(long openedAt) {
+        float progress = Math.min(1.0F, (System.currentTimeMillis() - openedAt) / 900.0F);
+        float remaining = 1.0F - progress;
+        return 360.0F * remaining * remaining * remaining;
+    }
+
+    public static int previewLeft(int width) {
+        return contentLeft(width);
     }
 
     public static int previewRight(int width) {
-        return width / 2 - 12;
+        return contentLeft(width) + contentWidth(width) / 2 - columnGap(width) / 2;
     }
 
     public static int previewTop() {
-        return 48;
+        return 38;
     }
 
     public static int previewBottom(int height) {
-        return height - 28;
+        return height - 12;
+    }
+
+    public static int playerScale(int height) {
+        return Math.min(105, Math.max(48, (previewBottom(height) - previewTop() - 46) / 2));
+    }
+
+    private static int columnGap(int width) {
+        return width < 600 ? 8 : 24;
     }
 
     public static Component previewName() {

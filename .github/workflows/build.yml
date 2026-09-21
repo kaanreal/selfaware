@@ -1,17 +1,15 @@
-name: Build
+name: Release
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -30,11 +28,36 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: python3 scripts/build.py --loader '${{ matrix.loader }}'
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: selfaware-${{ matrix.loader }}
           path: |
             build/*-${{ matrix.loader }}/libs/*.jar
-            build/*-${{ matrix.loader }}/reports/tests/
-            build/verification/
+            !build/*-${{ matrix.loader }}/libs/*-sources.jar
           if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: selfaware-*
+          path: release-artifacts
+          merge-multiple: true
+      - name: Upload GitHub release files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          find release-artifacts -type f -name '*.jar' ! -name '*-sources.jar' -print0 \
+            | xargs -0 gh release upload "$RELEASE_TAG" --clobber
+      - name: Publish every target to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: >-
+          python3 scripts/publish_modrinth.py
+          --artifacts release-artifacts
+          --version "${{ github.event.release.tag_name }}"

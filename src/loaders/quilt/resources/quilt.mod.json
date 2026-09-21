@@ -19,7 +19,7 @@
       {"id": "quilt_loader", "versions": ">=${loaderVersion}"},
       {"id": "minecraft", "versions": "=${minecraft}"},
       {"id": "java", "versions": ">=${java}"},
-      {"id": "fabric-api", "versions": ">=${fabricApiVersion}"},
+      {"id": "${fabricApiId}", "versions": ">=${fabricApiVersion}"},
       {"id": "modmenu", "versions": ">=${modMenuVersion}"}
     ]
   },

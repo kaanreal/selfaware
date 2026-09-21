@@ -16,7 +16,7 @@
     "fabricloader": ">=${loaderVersion}",
     "minecraft": "=${minecraft}",
     "java": ">=${java}",
-    "fabric-api": ">=${fabricApiVersion}",
+    "${fabricApiId}": ">=${fabricApiVersion}",
     "modmenu": ">=${modMenuVersion}"
   }
 }

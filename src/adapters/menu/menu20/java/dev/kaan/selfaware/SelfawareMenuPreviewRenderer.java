@@ -6,50 +6,70 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Quaternionf;
 
 final class SelfawareMenuPreviewRenderer {
     private SelfawareMenuPreviewRenderer() {}
 
-    static void render(GuiGraphics graphics, Font font, int width, int height, int mouseX, int mouseY) {
-        int left = SelfawareMenu.previewLeft();
+    static void render(GuiGraphics graphics, Font font, int width, int height, int mouseX, int mouseY,
+                       float openingSpin) {
+        SelfawareMenuStyle.render(canvas(graphics, font), width, height, mouseX, mouseY);
+
+        int left = SelfawareMenu.previewLeft(width);
         int right = SelfawareMenu.previewRight(width);
         int top = SelfawareMenu.previewTop();
         int bottom = SelfawareMenu.previewBottom(height);
-        graphics.fill(left, top, right, bottom, 0x88000000);
-        graphics.drawString(font, Component.nullToEmpty("Preview"), left + 10, top + 10, 0xFFFFFFFF);
-
-        Minecraft client = Minecraft.getInstance();
-        LivingEntity player = client.player;
-        if (player != null) {
-            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, (left + right) / 2, bottom - 18,
-                    105, mouseX, mouseY, player);
-        } else {
+        LivingEntity player = Minecraft.getInstance().player;
+        if (player == null) {
             graphics.drawCenteredString(font, Component.nullToEmpty("Join a world to preview"),
-                    (left + right) / 2, bottom / 2, 0xFFBBBBBB);
-        }
-
-        if (!SelfawareMenu.previewNametag()) {
+                    (left + right) / 2, (top + bottom) / 2, 0xFFBBBBBB);
             return;
         }
-        Component name = SelfawareMenu.previewName();
-        Component money = SelfawareMenu.previewMoney();
-        Component svc = SelfawareMenu.previewSvcIcon() ? Component.nullToEmpty("SVC") : null;
-        int nameWidth = font.width(name);
-        int moneyWidth = money == null ? 0 : font.width(money);
-        int svcWidth = svc == null ? 0 : font.width(svc) + 6;
-        int boxWidth = Math.max(nameWidth + svcWidth, moneyWidth) + 12;
-        int boxLeft = (left + right - boxWidth) / 2;
-        int nameY = top + 28;
-        int boxHeight = money == null ? 15 : 31;
-        if (SelfawareMenu.previewBackground()) {
-            graphics.fill(boxLeft, nameY - 3, boxLeft + boxWidth, nameY + boxHeight, 0x70000000);
-        }
-        graphics.drawString(font, name, (left + right - nameWidth - svcWidth) / 2, nameY, 0xFFFFFFFF);
-        if (svc != null) {
-            graphics.drawString(font, svc, (left + right + nameWidth - svcWidth) / 2 + 3, nameY, 0xFFAAAAAA);
-        }
-        if (money != null) {
-            graphics.drawCenteredString(font, money, (left + right) / 2, nameY + 15, 0xFFFFFFFF);
-        }
+
+        float centerX = (left + right) / 2.0F;
+        float centerY = (top + bottom) / 2.0F;
+        float yaw = (float) Math.toDegrees(Math.atan((centerX - mouseX) / 90.0F)) * 0.38F;
+        float pitch = (float) Math.toDegrees(Math.atan((centerY - mouseY) / 90.0F)) * 0.22F;
+        float oldBodyRot = player.yBodyRot;
+        float oldYRot = player.getYRot();
+        float oldXRot = player.getXRot();
+        float oldHeadRot = player.yHeadRot;
+        float oldHeadRotO = player.yHeadRotO;
+        player.yBodyRot = 180.0F + yaw + openingSpin;
+        player.setYRot(180.0F + yaw + openingSpin);
+        player.setXRot(-pitch);
+        player.yHeadRot = player.getYRot();
+        player.yHeadRotO = player.getYRot();
+
+        Quaternionf pose = new Quaternionf().rotateZ((float) Math.PI);
+        Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(pitch));
+        pose.mul(camera);
+        InventoryScreen.renderEntityInInventory(graphics, (int) centerX, bottom - 10,
+                SelfawareMenu.playerScale(height), pose, camera, player);
+
+        player.yBodyRot = oldBodyRot;
+        player.setYRot(oldYRot);
+        player.setXRot(oldXRot);
+        player.yHeadRot = oldHeadRot;
+        player.yHeadRotO = oldHeadRotO;
+    }
+
+    private static SelfawareMenuStyle.Canvas canvas(GuiGraphics graphics, Font font) {
+        return new SelfawareMenuStyle.Canvas() {
+            @Override
+            public void fill(int left, int top, int right, int bottom, int color) {
+                graphics.fill(left, top, right, bottom, color);
+            }
+
+            @Override
+            public void text(Component text, int x, int y, int color) {
+                graphics.drawString(font, text, x, y, color);
+            }
+
+            @Override
+            public void centeredText(Component text, int x, int y, int color) {
+                graphics.drawCenteredString(font, text, x, y, color);
+            }
+        };
     }
 }

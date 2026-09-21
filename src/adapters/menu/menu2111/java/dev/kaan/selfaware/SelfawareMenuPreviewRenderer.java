@@ -2,7 +2,7 @@ package dev.kaan.selfaware;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -16,7 +16,7 @@ import org.joml.Vector3f;
 final class SelfawareMenuPreviewRenderer {
     private SelfawareMenuPreviewRenderer() {}
 
-    static void render(GuiGraphicsExtractor graphics, Font font, int width, int height, int mouseX, int mouseY,
+    static void render(GuiGraphics graphics, Font font, int width, int height, int mouseX, int mouseY,
                        float openingSpin) {
         int left = SelfawareMenu.previewLeft(width);
         int right = SelfawareMenu.previewRight(width);
@@ -29,17 +29,19 @@ final class SelfawareMenuPreviewRenderer {
         if (player != null) {
             renderPlayer(graphics, player, left, top, right, bottom, height, mouseX, mouseY, openingSpin);
         } else {
-            graphics.centeredText(font, Component.nullToEmpty("Join a world to preview"),
+            graphics.drawCenteredString(font, Component.nullToEmpty("Join a world to preview"),
                     (left + right) / 2, bottom / 2, 0xFFBBBBBB);
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void renderPlayer(GuiGraphicsExtractor graphics, LivingEntity player, int left, int top, int right,
+    private static void renderPlayer(GuiGraphics graphics, LivingEntity player, int left, int top, int right,
                                      int bottom, int height, int mouseX, int mouseY, float openingSpin) {
-        EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        Minecraft client = Minecraft.getInstance();
+        EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         EntityRenderer renderer = dispatcher.getRenderer(player);
         EntityRenderState state = (EntityRenderState) renderer.createRenderState(player, 1.0F);
+        state.lightCoords = 15728880;
         state.shadowPieces.clear();
         state.outlineColor = 0;
 
@@ -60,11 +62,11 @@ final class SelfawareMenuPreviewRenderer {
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(pitch));
         pose.mul(camera);
         Vector3f offset = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
-        graphics.entity(state, SelfawareMenu.playerScale(height), offset, pose, camera,
+        graphics.submitEntityRenderState(state, SelfawareMenu.playerScale(height), offset, pose, camera,
                 left + 12, top + 48, right - 12, bottom - 8);
     }
 
-    private static SelfawareMenuStyle.Canvas canvas(GuiGraphicsExtractor graphics, Font font) {
+    private static SelfawareMenuStyle.Canvas canvas(GuiGraphics graphics, Font font) {
         return new SelfawareMenuStyle.Canvas() {
             @Override
             public void fill(int left, int top, int right, int bottom, int color) {
@@ -73,12 +75,12 @@ final class SelfawareMenuPreviewRenderer {
 
             @Override
             public void text(Component text, int x, int y, int color) {
-                graphics.text(font, text, x, y, color);
+                graphics.drawString(font, text, x, y, color);
             }
 
             @Override
             public void centeredText(Component text, int x, int y, int color) {
-                graphics.centeredText(font, text, x, y, color);
+                graphics.drawCenteredString(font, text, x, y, color);
             }
         };
     }

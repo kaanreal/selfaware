@@ -1,20 +1,20 @@
 package dev.kaan.selfaware;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 final class SelfawareMenuPreviewRenderer {
     private SelfawareMenuPreviewRenderer() {}
 
-    static void render(PoseStack poseStack, Font font, int width, int height, int mouseX, int mouseY,
+    static void render(GuiGraphics graphics, Font font, int width, int height, int mouseX, int mouseY,
                        float openingSpin) {
-        SelfawareMenuStyle.render(canvas(poseStack, font), width, height, mouseX, mouseY);
+        SelfawareMenuStyle.render(canvas(graphics, font), width, height, mouseX, mouseY);
 
         int left = SelfawareMenu.previewLeft(width);
         int right = SelfawareMenu.previewRight(width);
@@ -22,7 +22,7 @@ final class SelfawareMenuPreviewRenderer {
         int bottom = SelfawareMenu.previewBottom(height);
         LivingEntity player = Minecraft.getInstance().player;
         if (player == null) {
-            GuiComponent.drawCenteredString(poseStack, font, Component.nullToEmpty("Join a world to preview"),
+            graphics.drawCenteredString(font, Component.nullToEmpty("Join a world to preview"),
                     (left + right) / 2, (top + bottom) / 2, 0xFFBBBBBB);
             return;
         }
@@ -45,8 +45,9 @@ final class SelfawareMenuPreviewRenderer {
         Quaternionf pose = new Quaternionf().rotateZ((float) Math.PI);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(pitch));
         pose.mul(camera);
-        InventoryScreen.renderEntityInInventory(poseStack, (int) centerX, bottom - 10,
-                SelfawareMenu.playerScale(height), pose, camera, player);
+        Vector3f offset = new Vector3f(0.0F, player.getBbHeight() / 2.0F + 0.0625F, 0.0F);
+        InventoryScreen.renderEntityInInventory(graphics, centerX, bottom - 10,
+                SelfawareMenu.playerScale(height), offset, pose, camera, player);
 
         player.yBodyRot = oldBodyRot;
         player.setYRot(oldYRot);
@@ -55,21 +56,21 @@ final class SelfawareMenuPreviewRenderer {
         player.yHeadRotO = oldHeadRotO;
     }
 
-    private static SelfawareMenuStyle.Canvas canvas(PoseStack poseStack, Font font) {
+    private static SelfawareMenuStyle.Canvas canvas(GuiGraphics graphics, Font font) {
         return new SelfawareMenuStyle.Canvas() {
             @Override
             public void fill(int left, int top, int right, int bottom, int color) {
-                GuiComponent.fill(poseStack, left, top, right, bottom, color);
+                graphics.fill(left, top, right, bottom, color);
             }
 
             @Override
             public void text(Component text, int x, int y, int color) {
-                GuiComponent.drawString(poseStack, font, text, x, y, color);
+                graphics.drawString(font, text, x, y, color);
             }
 
             @Override
             public void centeredText(Component text, int x, int y, int color) {
-                GuiComponent.drawCenteredString(poseStack, font, text, x, y, color);
+                graphics.drawCenteredString(font, text, x, y, color);
             }
         };
     }
