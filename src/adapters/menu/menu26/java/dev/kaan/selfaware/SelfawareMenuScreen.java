@@ -23,37 +23,38 @@ public final class SelfawareMenuScreen extends Screen {
 
     @Override
     protected void init() {
-        int x = width / 2 - 125;
+        int x = SelfawareMenu.optionsLeft(width);
+        int buttonWidth = SelfawareMenu.optionsWidth(width);
         int y = SelfawareMenu.top(height);
         int row = 0;
         nametagButton = addRenderableWidget(Button.builder(SelfawareMenu.nametagLabel(), button -> {
             SelfawareMenu.toggleNametag();
             nametagButton.setMessage(SelfawareMenu.nametagLabel());
-        }).bounds(x, y + row++ * 26, 250, 20).build());
+        }).bounds(x, y + row++ * 26, buttonWidth, 20).build());
         if (SelfawareMenu.svcIconsAvailable()) {
             svcIconsButton = addRenderableWidget(Button.builder(SelfawareMenu.svcIconsLabel(), button -> {
                 SelfawareMenu.toggleSvcIcons();
                 svcIconsButton.setMessage(SelfawareMenu.svcIconsLabel());
-            }).bounds(x, y + row++ * 26, 250, 20).build());
+            }).bounds(x, y + row++ * 26, buttonWidth, 20).build());
         }
         serverFormattingButton = addRenderableWidget(Button.builder(SelfawareMenu.serverFormattingLabel(), button -> {
             SelfawareMenu.toggleServerFormatting();
             serverFormattingButton.setMessage(SelfawareMenu.serverFormattingLabel());
-        }).bounds(x, y + row++ * 26, 250, 20).build());
+        }).bounds(x, y + row++ * 26, buttonWidth, 20).build());
         if (SelfawareMenu.donutRankAvailable()) {
             addRenderableWidget(Button.builder(SelfawareMenu.donutRankLabel(), button -> {
                 SelfawareMenu.toggleDonutRank();
                 button.setMessage(SelfawareMenu.donutRankLabel());
-            }).bounds(x, y + row++ * 26, 250, 20).build());
+            }).bounds(x, y + row++ * 26, buttonWidth, 20).build());
         }
         if (SelfawareMenu.donutMoneyAvailable()) {
             donutMoneyButton = addRenderableWidget(Button.builder(SelfawareMenu.donutMoneyLabel(), button -> {
                 SelfawareMenu.toggleDonutMoney();
                 donutMoneyButton.setMessage(SelfawareMenu.donutMoneyLabel());
-            }).bounds(x, y + row++ * 26, 250, 20).build());
+            }).bounds(x, y + row++ * 26, buttonWidth, 20).build());
         }
         addRenderableWidget(Button.builder(SelfawareMenu.doneLabel(), button -> onClose())
-                .bounds(x, y + row * 26 + 8, 250, 20)
+                .bounds(x, y + row * 26 + 8, buttonWidth, 20)
                 .build());
     }
 
@@ -65,6 +66,7 @@ public final class SelfawareMenuScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
-        graphics.centeredText(font, SelfawareMenu.title(), width / 2, SelfawareMenu.top(height) - 24, 0xFFFFFF);
+        SelfawareMenuPreviewRenderer.render(graphics, font, width, height, mouseX, mouseY);
+        graphics.centeredText(font, SelfawareMenu.title(), width / 2, 20, 0xFFFFFF);
     }
 }

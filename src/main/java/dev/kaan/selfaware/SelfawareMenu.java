@@ -1,5 +1,7 @@
 package dev.kaan.selfaware;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 
 public final class SelfawareMenu {
@@ -70,7 +72,7 @@ public final class SelfawareMenu {
     }
 
     public static int visibleRows() {
-        int rows = 2;
+        int rows = 3;
         if (svcIconsAvailable()) {
             rows++;
         }
@@ -85,6 +87,63 @@ public final class SelfawareMenu {
 
     public static int top(int height) {
         return height / 2 - (visibleRows() * 26 + 8) / 2;
+    }
+
+    public static int optionsLeft(int width) {
+        return width / 2 + 12;
+    }
+
+    public static int optionsWidth(int width) {
+        return Math.max(180, Math.min(280, width - optionsLeft(width) - 24));
+    }
+
+    public static int previewLeft() {
+        return 24;
+    }
+
+    public static int previewRight(int width) {
+        return width / 2 - 12;
+    }
+
+    public static int previewTop() {
+        return 48;
+    }
+
+    public static int previewBottom(int height) {
+        return height - 28;
+    }
+
+    public static Component previewName() {
+        Minecraft client = Minecraft.getInstance();
+        Component plain = client.player == null ? Component.nullToEmpty("Kaanreal") : client.player.getName().copy();
+        boolean donut = ServerFormatting.isDonutServer();
+        PlayerInfo info = client.getConnection() == null || client.player == null
+                ? null : client.getConnection().getPlayerInfo(client.player.getUUID());
+        Component tab = info == null ? null : info.getTabListDisplayName();
+        if (donut) {
+            return ServerFormatting.selectDonutName(plain, tab, SelfawareConfig.donutRankEnabled());
+        }
+        return SelfawareConfig.serverFormattingEnabled() ? ServerFormatting.selectName(plain, tab) : plain;
+    }
+
+    public static Component previewMoney() {
+        if (!donutMoneyAvailable() || !SelfawareConfig.donutMoneyEnabled()) {
+            return null;
+        }
+        Component money = DonutMoneySupport.previewMoney();
+        return money == null ? Component.nullToEmpty("$ 196M") : money;
+    }
+
+    public static boolean previewBackground() {
+        return SelfawareConfig.serverFormattingEnabled();
+    }
+
+    public static boolean previewNametag() {
+        return SelfawareConfig.nametagEnabled();
+    }
+
+    public static boolean previewSvcIcon() {
+        return svcIconsAvailable() && SelfawareConfig.svcIconsEnabled();
     }
 
     private static String onOff(boolean enabled) {
