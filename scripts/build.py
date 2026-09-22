@@ -138,6 +138,9 @@ def main():
         except (subprocess.SubprocessError, AssertionError, OSError, KeyError, ValueError) as error:
             results.append({'target': identifier, 'build': 'failed', 'error': str(error), 'log': str(log.relative_to(ROOT))})
             print(f'Failed {identifier}: {error}; see {log.relative_to(ROOT)}', flush=True)
+            if log.exists():
+                lines = log.read_text(errors='replace').splitlines()
+                print('\n'.join(lines[-120:]), flush=True)
         (log_dir / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
     return int(any(result['build'] != 'passed' for result in results))
 

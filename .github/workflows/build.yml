@@ -34,6 +34,12 @@ jobs:
             build/*-${{ matrix.loader }}/libs/*.jar
             !build/*-${{ matrix.loader }}/libs/*-sources.jar
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: selfaware-${{ matrix.loader }}-failure
+          path: build/verification/
+          if-no-files-found: warn
 
   publish:
     needs: build
