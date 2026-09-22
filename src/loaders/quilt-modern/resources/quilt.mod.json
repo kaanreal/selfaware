@@ -8,7 +8,8 @@
     "metadata": {
       "name": "Selfaware",
       "description": "See your own nametag in third person.",
-      "contributors": {"Kaan": "Owner"}
+      "contributors": {"Kaan": "Owner"},
+      "icon": "assets/selfaware/icon.png"
     },
     "entrypoints": {
       "client": ["dev.kaan.selfaware.SelfawareClient"],

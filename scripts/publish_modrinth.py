@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 API = "https://api.modrinth.com/v2"
 PROJECT_SLUG = "selfaware"
 USER_AGENT = "kaanreal/selfaware (https://github.com/kaanreal/selfaware)"
+ICON = ROOT / "src/main/resources/assets/selfaware/icon.png"
 
 
 class ApiError(RuntimeError):
@@ -105,6 +106,14 @@ def get_or_create_project(token):
     return create_project(token)
 
 
+def set_project_icon(token, project):
+    icon = ICON.read_bytes()
+    if len(icon) > 256 * 1024:
+        raise RuntimeError("Modrinth project icon exceeds 256 KiB")
+    request(token, "PATCH", f"/project/{project['id']}/icon?ext=png", icon, "image/png")
+    print("Updated Modrinth project icon", flush=True)
+
+
 def dependencies_for(target, dependency_ids):
     dependencies = [{"project_id": dependency_ids["simple-voice-chat"], "dependency_type": "optional"}]
     if target["loader"] in ("fabric", "quilt"):
@@ -122,7 +131,7 @@ def find_jar(artifacts, target, version):
     return matches[0]
 
 
-def upload_version(token, project, target, version, jar, changelog, existing, dependency_ids):
+def upload_version(token, project, target, version, jar, changelog, existing, dependency_ids, replace_existing):
     number = f"{version}+mc{target['minecraft']}-{target['loader']}"
     current = existing.get(number)
     sha512 = hashlib.sha512(jar.read_bytes()).hexdigest()
@@ -131,7 +140,10 @@ def upload_version(token, project, target, version, jar, changelog, existing, de
         if sha512 in hashes:
             print(f"Already published {target['id']}", flush=True)
             return
-        raise RuntimeError(f"Modrinth version {number} exists with a different file")
+        if not replace_existing:
+            raise RuntimeError(f"Modrinth version {number} exists with a different file")
+        request(token, "DELETE", f"/version/{current['id']}")
+        print(f"Replacing {target['id']}", flush=True)
 
     loader_name = "NeoForge" if target["loader"] == "neoforge" else target["loader"].title()
     data = {
@@ -166,6 +178,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifacts", type=Path, required=True)
     parser.add_argument("--version", required=True)
+    parser.add_argument("--replace-existing", action="store_true")
     args = parser.parse_args()
     token = os.environ.get("MODRINTH_TOKEN", "").strip()
     if not token:
@@ -177,6 +190,7 @@ def main():
         raise RuntimeError(f"Release tag version {version} does not match mod_version {expected}")
 
     project = get_or_create_project(token)
+    set_project_icon(token, project)
     versions = request(token, "GET", f"/project/{project['id']}/version")
     existing = {item["version_number"]: item for item in versions}
     targets = json.loads((ROOT / "versions.json").read_text())
@@ -187,7 +201,8 @@ def main():
     }
     for target in targets:
         jar = find_jar(args.artifacts, target, version)
-        upload_version(token, project, target, version, jar, changelog, existing, dependency_ids)
+        upload_version(token, project, target, version, jar, changelog, existing, dependency_ids,
+                       args.replace_existing)
 
     if project["status"] in ("draft", "private", "unlisted"):
         request(token, "PATCH", f"/project/{project['id']}", {"requested_status": "approved"})

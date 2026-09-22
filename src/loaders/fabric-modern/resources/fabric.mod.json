@@ -5,6 +5,7 @@
   "name": "Selfaware",
   "description": "See your own nametag in third person.",
   "authors": ["Kaan"],
+  "icon": "assets/selfaware/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["dev.kaan.selfaware.SelfawareClient"],

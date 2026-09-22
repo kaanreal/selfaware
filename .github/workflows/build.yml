@@ -67,3 +67,4 @@ jobs:
           python3 scripts/publish_modrinth.py
           --artifacts release-artifacts
           --version "${{ github.event.release.tag_name }}"
+          --replace-existing

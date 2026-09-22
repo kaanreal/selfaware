@@ -1,5 +1,7 @@
 # Selfaware
 
+![Selfaware](src/main/resources/assets/selfaware/icon.png)
+
 See your own nametag in third person. That's it for now.
 
 Press F5 to see it from either side. Minecraft still handles the text, team prefix, and name color. The tag hides with F1, in first person, while invisible or spectating, and keeps vanilla's local-player behavior for team visibility.

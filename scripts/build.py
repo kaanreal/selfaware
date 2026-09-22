@@ -19,6 +19,8 @@ def verify_jar(target):
     jar = ROOT / 'build' / target['id'] / 'libs' / f"selfaware-{target['id']}-{version}.jar"
     with zipfile.ZipFile(jar) as archive:
         names = archive.namelist()
+        icon = 'assets/selfaware/icon.png'
+        assert icon in names and archive.read(icon).startswith(b'\x89PNG\r\n\x1a\n')
         fabric_api_id = 'fabric' if target['minecraft'] == '1.16.5' else 'fabric-api'
         mixin = json.loads(archive.read('selfaware.mixins.json'))
         assert mixin['required'] and mixin['injectors']['defaultRequire'] == 1
@@ -54,6 +56,7 @@ def verify_jar(target):
         if target['loader'] == 'quilt':
             metadata = json.loads(archive.read('quilt.mod.json'))
             assert metadata['minecraft']['environment'] == 'client'
+            assert metadata['quilt_loader']['metadata']['icon'] == icon
             assert metadata['quilt_loader']['version'] == version
             assert {'id': 'minecraft', 'versions': '=' + target['minecraft']} in metadata['quilt_loader']['depends']
             assert any(dependency['id'] == 'modmenu' and dependency['versions'].startswith('>=')
@@ -71,6 +74,7 @@ def verify_jar(target):
         elif target['loader'] == 'fabric':
             metadata = json.loads(archive.read('fabric.mod.json'))
             assert metadata['environment'] == 'client'
+            assert metadata['icon'] == icon
             assert metadata['depends']['minecraft'] == '=' + target['minecraft']
             assert metadata['depends']['modmenu'].startswith('>=')
             assert metadata['version'] == version and metadata['id'] == 'selfaware'
@@ -86,6 +90,7 @@ def verify_jar(target):
             filename = 'META-INF/mods.toml' if target['loader'] == 'forge' or target['minecraft'] in ['1.20.2', '1.20.4'] else 'META-INF/neoforge.mods.toml'
             metadata = archive.read(filename).decode()
             assert '${' not in metadata and f'versionRange="[{target["minecraft"]}]"' in metadata
+            assert f'logoFile="{icon}"' in metadata
             assert 'modmenu' not in metadata.lower()
             assert 'fabric.mod.json' not in names
         for name in names:

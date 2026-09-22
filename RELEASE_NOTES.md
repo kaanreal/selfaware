@@ -6,5 +6,6 @@
 - Show Simple Voice Chat status icons on your own nametag.
 - Open the settings screen through `/selfaware`, Mod Menu, or a configurable keybind.
 - Preview every setting live with the same responsive menu and opening animation across versions.
+- Show the Selfaware icon in mod lists and launchers on every loader.
 
 This release includes all Fabric, Quilt, Forge, and NeoForge targets listed in `versions.json`.
