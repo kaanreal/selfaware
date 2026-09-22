@@ -114,6 +114,12 @@ def set_project_icon(token, project):
     print("Updated Modrinth project icon", flush=True)
 
 
+def update_project_body(token, project):
+    body = (ROOT / "README.md").read_text(encoding="utf-8")
+    request(token, "PATCH", f"/project/{project['id']}", {"body": body})
+    print("Updated Modrinth project description", flush=True)
+
+
 def dependencies_for(target, dependency_ids):
     dependencies = [{"project_id": dependency_ids["simple-voice-chat"], "dependency_type": "optional"}]
     if target["loader"] in ("fabric", "quilt"):
@@ -191,6 +197,7 @@ def main():
 
     project = get_or_create_project(token)
     set_project_icon(token, project)
+    update_project_body(token, project)
     versions = request(token, "GET", f"/project/{project['id']}/version")
     existing = {item["version_number"]: item for item in versions}
     targets = json.loads((ROOT / "versions.json").read_text())
