@@ -128,10 +128,17 @@ def main():
                 command = [str(wrapper), 'clean', 'build', f'-Ptarget={identifier}', '--console=plain']
                 if target['loader'] == 'neoforge' and target['minecraft'].startswith('26.'):
                     # NeoGradle adds an empty game-test task that downloads runtime assets and can hang in CI.
-                    command += ['-x', 'testJunit']
+                    # It also expands NeoForm patches under build/ during configuration, so clean must finish first.
+                    commands = [
+                        [str(wrapper), 'clean', f'-Ptarget={identifier}', '--console=plain'],
+                        [str(wrapper), 'build', f'-Ptarget={identifier}', '--console=plain', '-x', 'testJunit'],
+                    ]
+                else:
+                    commands = [command]
                 with log.open('w') as output:
-                    subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT,
-                                   check=True, timeout=1200, env=for_gradle())
+                    for command in commands:
+                        subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT,
+                                       check=True, timeout=1200, env=for_gradle())
             artifact = verify_jar(target)
             results.append({'target': identifier, 'build': 'passed', 'artifact': artifact})
             print(f'Passed {identifier}', flush=True)
