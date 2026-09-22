@@ -120,6 +120,15 @@ def update_project_body(token, project):
     print("Updated Modrinth project description", flush=True)
 
 
+def try_update_project_body(token, project):
+    try:
+        update_project_body(token, project)
+    except ApiError as error:
+        if error.status != 400 or "validation nags" not in str(error):
+            raise
+        print("Modrinth kept the existing description while the project is under review", flush=True)
+
+
 def dependencies_for(target, dependency_ids):
     dependencies = [{"project_id": dependency_ids["simple-voice-chat"], "dependency_type": "optional"}]
     if target["loader"] in ("fabric", "quilt"):
@@ -197,7 +206,7 @@ def main():
 
     project = get_or_create_project(token)
     set_project_icon(token, project)
-    update_project_body(token, project)
+    try_update_project_body(token, project)
     versions = request(token, "GET", f"/project/{project['id']}/version")
     existing = {item["version_number"]: item for item in versions}
     targets = json.loads((ROOT / "versions.json").read_text())
